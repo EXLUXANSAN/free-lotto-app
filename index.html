@@ -6,9 +6,10 @@ import {
 } from 'lucide-react';
 
 /**
- * 최종 완성형: 행운나눔 앱
+ * 최종 완성형: 행운나눔 앱 (모바일 최적화 버전)
  * 로그인: 파란 그라데이션 + 별 장식 (사용자 확정안)
  * 홈 화면: 화사하고 지적인 시니어 럭셔리 (비취 & 샴페인 화이트)
+ * 특징: 깃허브 배포 및 모바일 웹 뷰 최적화
  */
 
 export default function App() {
@@ -23,13 +24,14 @@ export default function App() {
   const [adProgress, setAdProgress] = useState(0);
   const [showRewardModal, setShowRewardModal] = useState(false);
 
+  // 화면 전환 렌더링
   const renderScreen = () => {
     if (currentScreen === 'login') return <로그인화면 onLogin={() => setCurrentScreen('main')} />;
     
     return (
-      <div className="flex flex-col h-screen bg-[#FCFAF5] text-[#2D3436] max-w-md mx-auto relative overflow-hidden font-sans">
-        {/* 상단 헤더: 화사하고 깨끗한 화이트 배경 */}
-        <header className="px-6 py-6 flex justify-between items-center z-50 bg-white border-b border-gray-100 shadow-sm">
+      <div className="flex flex-col h-full bg-[#FCFAF5] text-[#2D3436] relative overflow-hidden font-sans">
+        {/* 상단 헤더 */}
+        <header className="px-6 py-6 flex justify-between items-center z-50 bg-white border-b border-gray-100 shadow-sm shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-[#2D5A27] to-[#1E3A1A] rounded-xl flex items-center justify-center shadow-lg">
               <Flower2 className="w-6 h-6 text-white" />
@@ -38,21 +40,21 @@ export default function App() {
           </div>
           <div className="flex items-center gap-4 text-gray-400">
             <Bell className="w-6 h-6 hover:text-[#2D5A27] transition-colors cursor-pointer" />
-            <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden">
               <User className="w-6 h-6 text-gray-400" />
             </div>
           </div>
         </header>
 
         {/* 본문 영역 */}
-        <main className="flex-1 overflow-y-auto pb-28 z-10 custom-scrollbar">
+        <main className="flex-1 overflow-y-auto pb-32 z-10 custom-scrollbar">
           {activeTab === '첫화면' && <홈탭 onWatchAd={handleAdStart} />}
           {activeTab === '행운함' && <행운함탭 tickets={tickets} points={points} />}
           {activeTab === '방문예약' && <예약탭 onBook={handleBookingComplete} />}
           {activeTab === '정보' && <내정보탭 />}
         </main>
 
-        {/* 하단 내비게이션: 고급스러운 디자인 */}
+        {/* 하단 내비게이션 */}
         <nav className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[92%] h-20 bg-white border border-gray-100 rounded-[28px] flex justify-around items-center z-50 shadow-[0_15px_35px_rgba(0,0,0,0.06)]">
           <내비버튼 아이콘={<Home />} 라벨="첫화면" 활성={activeTab === '첫화면'} onClick={() => setActiveTab('첫화면')} />
           <내비버튼 아이콘={<Ticket />} 라벨="행운함" 활성={activeTab === '행운함'} onClick={() => setActiveTab('행운함')} badge={tickets.length} />
@@ -101,26 +103,26 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#DDE2E5] flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-[40px] overflow-hidden shadow-2xl border-[8px] border-white h-[850px] relative">
+    <div className="min-h-screen bg-[#DDE2E5] flex items-center justify-center p-0 sm:p-4">
+      {/* 모바일 프레임 최적화 */}
+      <div className="w-full max-w-md bg-white sm:rounded-[40px] overflow-hidden shadow-2xl sm:border-[8px] border-white h-screen sm:h-[850px] relative">
         {renderScreen()}
       </div>
     </div>
   );
 }
 
-// --- 로그인 화면: 사용자 확정 스타일 반영 ---
+// --- 로그인 화면 ---
 const 로그인화면 = ({ onLogin }) => (
-  <div className="h-full flex flex-col items-center justify-between bg-gradient-to-b from-[#4A59E9] to-[#2E3AC7] p-10 relative overflow-hidden">
-    
-    <div className="mt-20 text-center z-10 flex flex-col items-center">
-      <div className="relative mb-6">
-        <div className="flex gap-1 justify-center">
+  <div className="h-full flex flex-col items-center justify-between bg-gradient-to-b from-[#4A59E9] to-[#2E3AC7] p-10 relative overflow-hidden text-center">
+    <div className="mt-20 z-10 flex flex-col items-center">
+      <div className="relative mb-8">
+        <div className="flex gap-2 justify-center">
             <div className="animate-pulse">
                 <Sparkles className="w-10 h-10 text-yellow-300 fill-yellow-300" />
             </div>
             <div className="animate-pulse delay-75">
-                <Sparkles className="w-14 h-14 text-yellow-400 fill-yellow-400 -mt-4" />
+                <Sparkles className="w-16 h-16 text-yellow-400 fill-yellow-400 -mt-6" />
             </div>
             <div className="animate-pulse delay-150">
                 <Sparkles className="w-8 h-8 text-yellow-200 fill-yellow-200" />
@@ -128,17 +130,17 @@ const 로그인화면 = ({ onLogin }) => (
         </div>
       </div>
       
-      <h1 className="text-5xl font-extrabold tracking-tight mb-2 text-white">무료로또</h1>
+      <h1 className="text-5xl font-extrabold tracking-tight mb-3 text-white">무료로또</h1>
       <p className="text-blue-100 text-lg font-medium opacity-90">매일 터지는 100% 당첨 행운 ✨</p>
     </div>
 
-    <div className="w-full space-y-3.5 z-10 mb-14">
+    <div className="w-full space-y-4 z-10 mb-16">
       <소셜버튼 타입="구글" onClick={onLogin} />
       <소셜버튼 타입="카카오" onClick={onLogin} />
       <소셜버튼 타입="네이버" onClick={onLogin} />
       
-      <p className="text-[12px] text-blue-100/60 text-center mt-8">
-        로그인 시 이용약관 및 개인정보처리방침에 동의하게 됩니다.
+      <p className="text-[12px] text-blue-100/60 mt-8 leading-relaxed">
+        로그인 시 이용약관 및 <br/>개인정보처리방침에 동의하게 됩니다.
       </p>
     </div>
   </div>
@@ -151,7 +153,7 @@ const 소셜버튼 = ({ 타입, onClick }) => {
       글자: 'text-[#3C1E1E]', 
       이름: '카카오로 시작하기',
       아이콘: (
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" className="mr-2">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" className="mr-3">
           <path d="M12 3c-5.523 0-10 3.535-10 7.896 0 2.822 1.838 5.305 4.603 6.643-.298 1.108-1.077 4.155-1.107 4.293-.038.172.062.164.128.12.086-.057 4.12-2.828 5.756-3.957.524.076 1.066.117 1.62.117 5.523 0 10-3.535 10-7.896C22 6.535 17.523 3 12 3z"/>
         </svg>
       )
@@ -161,7 +163,7 @@ const 소셜버튼 = ({ 타입, onClick }) => {
       글자: 'text-white', 
       이름: '네이버로 시작하기',
       아이콘: (
-        <div className="bg-white text-[#03C75A] font-black w-5 h-5 rounded-sm flex items-center justify-center text-[12px] mr-2">N</div>
+        <div className="bg-white text-[#03C75A] font-black w-5 h-5 rounded-sm flex items-center justify-center text-[12px] mr-3">N</div>
       )
     },
     구글: { 
@@ -169,7 +171,7 @@ const 소셜버튼 = ({ 타입, onClick }) => {
       글자: 'text-gray-700', 
       이름: '구글로 시작하기',
       아이콘: (
-        <svg viewBox="0 0 24 24" width="20" height="20" className="mr-2">
+        <svg viewBox="0 0 24 24" width="20" height="20" className="mr-3">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
         </svg>
       )
@@ -177,24 +179,19 @@ const 소셜버튼 = ({ 타입, onClick }) => {
   };
   const s = 설정[타입];
   return (
-    <button onClick={onClick} className={`w-full ${s.배경} ${s.글자} h-[58px] rounded-xl flex items-center justify-center font-bold text-lg active:scale-[0.98] transition-all shadow-md`}>
+    <button onClick={onClick} className={`w-full ${s.배경} ${s.글자} h-[62px] rounded-2xl flex items-center justify-center font-bold text-lg active:scale-[0.97] transition-all shadow-md`}>
       {s.아이콘}
       {s.이름}
     </button>
   );
 };
 
-// --- 첫화면 탭 리뉴얼 ---
+// --- 홈 탭 ---
 const 홈탭 = ({ onWatchAd }) => (
   <div className="p-6 space-y-8 animate-in fade-in duration-700">
-    
-    {/* 총액 영역: 화사한 비취색 그라데이션 포인트 */}
     <div className="relative">
       <div className="bg-white border border-gray-100 rounded-[36px] p-8 text-center shadow-[0_10px_25px_rgba(0,0,0,0.03)] overflow-hidden">
-        {/* 장식용 은은한 배경 요소 */}
         <div className="absolute top-0 right-0 w-24 h-24 bg-amber-50 rounded-full -mr-10 -mt-10 opacity-50"></div>
-        <div className="absolute bottom-0 left-0 w-16 h-16 bg-[#2D5A27]/5 rounded-full -ml-8 -mb-8 opacity-50"></div>
-        
         <p className="text-[13px] text-[#2D5A27] font-bold tracking-[0.3em] mb-4 flex items-center justify-center gap-2">
            <Trophy className="w-4 h-4" /> 이번 주 행운 나눔액 
         </p>
@@ -206,22 +203,21 @@ const 홈탭 = ({ onWatchAd }) => (
         </div>
         <div className="inline-flex items-center gap-2 bg-[#F9F7F2] border border-[#2D5A27]/10 px-6 py-2.5 rounded-full shadow-inner">
           <Clock className="w-4 h-4 text-[#2D5A27]" />
-          <span className="text-sm font-bold text-[#2D5A27] font-mono">추첨까지 02일 14:30 남음 ⏳</span>
+          <span className="text-sm font-bold text-[#2D5A27] font-mono">마감까지: 02일 14:30 ⏳</span>
         </div>
       </div>
     </div>
 
-    {/* 안산 본점 배너: 화려하고 쨍한 샴페인 골드 & 비취색 조합 */}
     <div onClick={() => {}} className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#2D5A27] to-[#1E3A1A] p-8 flex items-center justify-between shadow-xl shadow-[#2D5A27]/20 cursor-pointer active:scale-[0.97] transition-all">
-      <div className="space-y-3 z-10">
+      <div className="space-y-3 z-10 text-left">
         <div className="flex items-center gap-2">
           <div className="bg-white/20 p-1 rounded-md">
             <Zap className="w-3.5 h-3.5 text-white fill-white" />
           </div>
           <span className="text-[11px] font-black text-amber-200 tracking-widest uppercase">Special Reward</span>
         </div>
-        <h3 className="text-2xl font-bold text-white leading-tight">안산 직영점 <br/>방문 예약하기 🏠</h3>
-        <p className="text-sm text-white/80 font-medium">지금 예약하면 행운권 5장 더! 🎁</p>
+        <h3 className="text-2xl font-bold text-white leading-tight">안산 직영본점 <br/>방문 예약하기 🏠</h3>
+        <p className="text-sm text-white/80 font-medium text-left">지금 예약하면 행운권 5장 더! 🎁</p>
       </div>
       <div className="relative">
         <div className="absolute inset-0 bg-white/20 blur-xl rounded-full scale-150 animate-pulse"></div>
@@ -231,8 +227,7 @@ const 홈탭 = ({ onWatchAd }) => (
       </div>
     </div>
 
-    {/* 광고 리스트: 깔끔하고 고급스러운 카드 스타일 */}
-    <div className="space-y-4">
+    <div className="space-y-4 text-left">
       <div className="flex items-center justify-between px-1">
         <h3 className="text-lg font-bold text-gray-800">오늘의 행운 모으기 🌟</h3>
         <span className="text-xs text-gray-400 font-bold">전체보기</span>
@@ -273,7 +268,7 @@ const 홈탭 = ({ onWatchAd }) => (
 
 // --- 행운함 탭 ---
 const 행운함탭 = ({ tickets, points }) => (
-  <div className="p-6 space-y-8 animate-in slide-in-from-bottom-5 duration-700">
+  <div className="p-6 space-y-8 animate-in slide-in-from-bottom-5 duration-700 text-left">
     <div className="bg-white p-10 rounded-[40px] border border-gray-100 text-center shadow-sm relative overflow-hidden">
       <div className="absolute top-0 right-0 w-32 h-32 bg-gray-50 rounded-full -mr-16 -mt-16 opacity-50"></div>
       <Wallet className="w-10 h-10 text-[#2D5A27] mx-auto mb-4" />
@@ -313,11 +308,11 @@ const 행운함탭 = ({ tickets, points }) => (
 
 // --- 예약 탭 ---
 const 예약탭 = ({ onBook }) => (
-  <div className="h-full flex flex-col animate-in fade-in duration-700">
+  <div className="h-full flex flex-col animate-in fade-in duration-700 text-left">
     <div className="relative h-[280px] shrink-0 bg-[#2D5A27] flex items-end p-8 overflow-hidden">
       <div className="absolute inset-0 opacity-40 bg-[url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80')] bg-cover"></div>
       <div className="absolute inset-0 bg-gradient-to-t from-[#2D5A27] to-transparent"></div>
-      <div className="relative z-10 w-full">
+      <div className="relative z-10 w-full text-left">
         <div className="flex items-center gap-2 mb-3">
           <ShieldCheck className="w-5 h-5 text-amber-300" />
           <span className="text-[12px] text-white/80 font-bold tracking-[0.2em] uppercase">Lucklayer Official</span>
@@ -332,7 +327,7 @@ const 예약탭 = ({ onBook }) => (
         <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-amber-100">
           <Sparkles className="w-6 h-6 text-amber-500" />
         </div>
-        <div className="text-[15px] leading-relaxed text-gray-600 font-medium">
+        <div className="text-[15px] leading-relaxed text-gray-600 font-medium text-left">
           본점 방문 시니어 고객님께 <br/> <span className="text-[#2D5A27] font-bold underline text-lg">무료 행운권 5장</span>을 선물합니다 🎁
         </div>
       </div>
@@ -343,8 +338,8 @@ const 예약탭 = ({ onBook }) => (
           <div className="bg-white border border-gray-100 p-5 rounded-2xl text-center text-lg font-bold text-gray-800 shadow-sm">2026년 2월 26일 (목)</div>
         </div>
         <div>
-          <h4 className="text-[12px] text-gray-400 font-black uppercase tracking-widest mb-4">방문 시간대 🕒</h4>
-          <div className="grid grid-cols-3 gap-4">
+          <h4 className="text-[12px] text-gray-400 font-black uppercase tracking-widest mb-4 text-left">방문 시간대 🕒</h4>
+          <div className="grid grid-cols-3 gap-4 text-left">
             {['11:00', '14:00', '16:00'].map(t => (
               <button key={t} className="py-4 rounded-xl border border-gray-100 bg-white text-sm font-bold text-gray-500 hover:border-[#2D5A27] hover:text-[#2D5A27] transition-all shadow-sm">오전 {t.split(':')[0] === '11' ? '11' : '0' + (t.split(':')[0]-12)}시</button>
             ))}
@@ -362,7 +357,7 @@ const 예약탭 = ({ onBook }) => (
 );
 
 const 내정보탭 = () => (
-  <div className="p-8 space-y-12">
+  <div className="p-8 space-y-12 text-center">
     <div className="flex flex-col items-center text-center">
       <div className="w-28 h-28 rounded-[40px] bg-white border border-gray-100 flex items-center justify-center mb-6 shadow-xl relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#F9F7F2] to-transparent"></div>
@@ -435,7 +430,7 @@ const 보상알림창 = ({ onClose, onGoBooking }) => (
         className="relative bg-[#F9F7F2] border border-amber-100 rounded-[36px] p-7 text-left cursor-pointer active:scale-95 transition-all shadow-sm group"
       >
         <div className="absolute inset-0 bg-amber-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-[36px]"></div>
-        <div className="relative z-10">
+        <div className="relative z-10 text-left">
           <span className="text-[12px] text-amber-600 font-black mb-1 block uppercase tracking-widest">Special Benefit 🎁</span>
           <h3 className="text-lg font-bold text-gray-900 leading-tight mb-4">안산 본점 예약 시 <br/><span className="text-[#2D5A27] underline">행운권 5장</span> 더 드리기 🎫</h3>
           <div className="flex items-center gap-2 text-[12px] text-gray-400 font-bold uppercase">
