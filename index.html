@@ -2,22 +2,20 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <!-- 모바일에서 앱처럼 보이게 확대/축소 방지 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>무료로또 앱 프로토타입</title>
     
-    <!-- Tailwind CSS (디자인) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <!-- Babel (브라우저에서 JSX 변환) -->
+    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-        /* 모바일 앱처럼 텍스트 드래그 방지 및 터치 최적화 */
         body {
             margin: 0;
             padding: 0;
@@ -27,7 +25,6 @@
             -webkit-tap-highlight-color: transparent;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
-        /* 커스텀 스크롤바 숨기기 (앱처럼 보이게) */
         ::-webkit-scrollbar { display: none; }
     </style>
 </head>
@@ -37,7 +34,6 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // 아이콘용 SVG 컴포넌트들 (Lucide 대체)
         const Icons = {
             Home: () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
             Ticket: () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="5" rx="2" ry="2"/><line x1="2" x2="22" y1="12" y2="12"/></svg>,
@@ -46,7 +42,11 @@
             Play: () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>,
             X: () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>,
             ChevronRight: () => <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>,
-            Gift: () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>
+            Gift: () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>,
+            // 소셜 로그인 로고 아이콘
+            Kakao: () => <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 3c-5.523 0-10 3.535-10 7.896 0 2.822 1.838 5.305 4.603 6.643-.298 1.108-1.077 4.155-1.107 4.293-.038.172.062.164.128.12.086-.057 4.12-2.828 5.756-3.957.524.076 1.066.117 1.62.117 5.523 0 10-3.535 10-7.896C22 6.535 17.523 3 12 3z"/></svg>,
+            Naver: () => <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M16.273 12.845 7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727v12.845z"/></svg>,
+            Google: () => <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
         };
 
         function App() {
@@ -61,7 +61,6 @@
             const [adProgress, setAdProgress] = useState(0);
             const [showRewardModal, setShowRewardModal] = useState(false);
 
-            // 광고 시청
             const startAdWatch = () => {
                 setIsAdWatching(true);
                 setAdProgress(0);
@@ -90,19 +89,37 @@
                 setActiveTab('wallet');
             };
 
+            // 수정된 로그인 스크린
             if (currentScreen === 'login') {
                 return (
                     <div className="h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-indigo-600 to-blue-800 text-white p-6 relative">
                         <div className="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-                        <div className="text-center z-10 mb-16">
+                        
+                        <div className="text-center z-10 mb-12 mt-10">
                             <div className="text-6xl mb-4">✨</div>
                             <h1 className="text-4xl font-extrabold mb-2">무료로또</h1>
-                            <p className="text-indigo-200">매일 터지는 100% 당첨 행운</p>
+                            <p className="text-indigo-200 text-sm font-medium">매일 터지는 100% 당첨 행운</p>
                         </div>
-                        <div className="w-full max-w-sm space-y-3 z-10">
-                            <button onClick={() => setCurrentScreen('main')} className="w-full bg-[#FEE500] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform">
-                                카카오로 시작하기
+                        
+                        <div className="w-full max-w-sm space-y-3 z-10 mb-10">
+                            {/* 카카오 로그인 */}
+                            <button onClick={() => setCurrentScreen('main')} className="w-full bg-[#FEE500] text-[#000000] font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform text-[15px]">
+                                <Icons.Kakao /> 카카오로 시작하기
                             </button>
+                            
+                            {/* 네이버 로그인 */}
+                            <button onClick={() => setCurrentScreen('main')} className="w-full bg-[#03C75A] text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform text-[15px]">
+                                <Icons.Naver /> 네이버로 시작하기
+                            </button>
+                            
+                            {/* 구글 로그인 */}
+                            <button onClick={() => setCurrentScreen('main')} className="w-full bg-white text-gray-700 font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform text-[15px]">
+                                <Icons.Google /> 구글로 시작하기
+                            </button>
+                        </div>
+                        
+                        <div className="absolute bottom-10 z-10 text-[11px] text-indigo-300 text-center">
+                            로그인 시 이용약관 및 개인정보처리방침에 동의하게 됩니다.
                         </div>
                     </div>
                 );
