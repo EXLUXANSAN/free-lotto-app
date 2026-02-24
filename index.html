@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <!-- 모바일에서 앱처럼 보이게 확대/축소 방지 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>무료로또 앱 프로토타입</title>
+    
+    <!-- Tailwind CSS (디자인) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel (브라우저에서 JSX 변환) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* 모바일 앱처럼 텍스트 드래그 방지 및 터치 최적화 */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        /* 커스텀 스크롤바 숨기기 (앱처럼 보이게) */
+        ::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // 아이콘용 SVG 컴포넌트들 (Lucide 대체)
+        const Icons = {
+            Home: () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+            Ticket: () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="5" rx="2" ry="2"/><line x1="2" x2="22" y1="12" y2="12"/></svg>,
+            Calendar: () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>,
+            User: () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+            Play: () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>,
+            X: () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>,
+            ChevronRight: () => <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>,
+            Gift: () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>
+        };
+
+        function App() {
+            const [currentScreen, setCurrentScreen] = useState('login');
+            const [activeTab, setActiveTab] = useState('home');
+            const [points, setPoints] = useState(150000);
+            const [tickets, setTickets] = useState([
+                { id: 1, numbers: [12, 24, 35, 41, 42, 45], source: '가입 축하', date: '2026-02-24' }
+            ]);
+            
+            const [isAdWatching, setIsAdWatching] = useState(false);
+            const [adProgress, setAdProgress] = useState(0);
+            const [showRewardModal, setShowRewardModal] = useState(false);
+
+            // 광고 시청
+            const startAdWatch = () => {
+                setIsAdWatching(true);
+                setAdProgress(0);
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 20;
+                    setAdProgress(progress);
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            setIsAdWatching(false);
+                            generateLotto('1/10 광고 시청');
+                            setShowRewardModal(true);
+                        }, 500);
+                    }
+                }, 600);
+            };
+
+            const generateLotto = (source) => {
+                const newNumbers = Array.from({length: 6}, () => Math.floor(Math.random() * 45) + 1).sort((a,b)=>a-b);
+                setTickets(prev => [{ id: Date.now() + Math.random(), numbers: newNumbers, source, date: new Date().toISOString().split('T')[0] }, ...prev]);
+            };
+
+            const handleBooking = () => {
+                for(let i=0; i<5; i++) generateLotto('안산 지사 예약 보상');
+                setActiveTab('wallet');
+            };
+
+            if (currentScreen === 'login') {
+                return (
+                    <div className="h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-indigo-600 to-blue-800 text-white p-6 relative">
+                        <div className="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                        <div className="text-center z-10 mb-16">
+                            <div className="text-6xl mb-4">✨</div>
+                            <h1 className="text-4xl font-extrabold mb-2">무료로또</h1>
+                            <p className="text-indigo-200">매일 터지는 100% 당첨 행운</p>
+                        </div>
+                        <div className="w-full max-w-sm space-y-3 z-10">
+                            <button onClick={() => setCurrentScreen('main')} className="w-full bg-[#FEE500] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform">
+                                카카오로 시작하기
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="h-screen w-full bg-gray-50 flex flex-col relative max-w-md mx-auto sm:border-x sm:border-gray-300">
+                    {/* 상단 헤더 */}
+                    <header className="bg-white px-5 py-4 flex justify-between items-center shadow-sm z-10 shrink-0">
+                        <div className="font-bold text-xl text-indigo-600 tracking-tight">무료로또<span className="text-yellow-500">✨</span></div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600 font-medium">보유: <span className="text-indigo-600 font-bold">{points.toLocaleString()}</span>원</span>
+                            <button className="text-xs bg-gray-100 px-3 py-1.5 rounded-md text-gray-700 font-bold active:bg-gray-200">출금</button>
+                        </div>
+                    </header>
+
+                    {/* 본문 영역 */}
+                    <main className="flex-1 overflow-y-auto pb-20 w-full relative">
+                        {activeTab === 'home' && (
+                            <div className="p-5 pb-10 space-y-6">
+                                <div className="bg-gradient-to-r from-gray-900 to-indigo-900 rounded-2xl p-5 text-white shadow-xl">
+                                    <p className="text-sm text-indigo-200 font-medium mb-1">제 1109회 추첨 마감까지</p>
+                                    <div className="text-3xl font-black font-mono">
+                                        02<span className="text-lg text-gray-400 font-sans mx-1">일</span>14<span className="text-lg text-gray-400 font-sans mx-1">시간</span>
+                                    </div>
+                                </div>
+
+                                <div onClick={() => setActiveTab('booking')} className="bg-yellow-100 rounded-2xl p-4 flex items-center justify-between border border-yellow-200 active:bg-yellow-200">
+                                    <div>
+                                        <div className="flex items-center gap-1 mb-1">
+                                            <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">HOT</span>
+                                            <span className="text-xs font-bold text-yellow-800">지사 방문 이벤트</span>
+                                        </div>
+                                        <p className="text-sm font-bold text-gray-800">안산 지사 체험하고<br/>로또 5장 즉시 받기!</p>
+                                    </div>
+                                    <Icons.Gift />
+                                </div>
+
+                                <div>
+                                    <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">오늘의 무료 로또 받기</h2>
+                                    <div className="space-y-3">
+                                        <button onClick={startAdWatch} className="w-full bg-white border border-red-200 rounded-xl p-4 shadow-sm flex items-center justify-between active:scale-95">
+                                            <div className="text-left">
+                                                <span className="text-xs font-bold px-2 py-1 rounded bg-red-50 text-red-600 mb-2 inline-block">1/10 당첨확률</span>
+                                                <h3 className="text-gray-800 font-semibold text-sm">A사 화장품 15초 영상</h3>
+                                            </div>
+                                            <div className="text-center">
+                                                <span className="text-indigo-600 font-black">1장</span>
+                                                <div className="text-[10px] text-gray-400">받기</div>
+                                            </div>
+                                        </button>
+                                        <button onClick={startAdWatch} className="w-full bg-white border border-blue-200 rounded-xl p-4 shadow-sm flex items-center justify-between active:scale-95">
+                                            <div className="text-left">
+                                                <span className="text-xs font-bold px-2 py-1 rounded bg-blue-50 text-blue-600 mb-2 inline-block">1/50 당첨확률</span>
+                                                <h3 className="text-gray-800 font-semibold text-sm">B게임 사전예약 참여</h3>
+                                            </div>
+                                            <div className="text-center">
+                                                <span className="text-indigo-600 font-black">1장</span>
+                                                <div className="text-[10px] text-gray-400">받기</div>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'wallet' && (
+                            <div className="p-5 pb-10">
+                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6 text-center">
+                                    <p className="text-gray-500 text-sm font-medium mb-1">출금 가능 당첨금</p>
+                                    <h2 className="text-3xl font-black text-indigo-600">{points.toLocaleString()} <span className="text-lg text-gray-800">원</span></h2>
+                                    <button className="mt-4 w-full bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-md">출금 신청하기</button>
+                                </div>
+                                <h3 className="font-bold text-gray-800 mb-4">보유 로또 <span className="text-indigo-600">{tickets.length}</span>장</h3>
+                                <div className="space-y-3">
+                                    {tickets.map((t, i) => (
+                                        <div key={t.id} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                                            <div className="flex justify-between items-center mb-3">
+                                                <span className="text-xs font-semibold bg-gray-100 text-gray-600 px-2 py-1 rounded">{t.source}</span>
+                                                <span className="text-xs text-gray-400">{t.date}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                {t.numbers.map((num, idx) => {
+                                                    let bg = "bg-yellow-400 text-black";
+                                                    if(num > 10) bg = "bg-blue-500 text-white";
+                                                    if(num > 20) bg = "bg-red-500 text-white";
+                                                    if(num > 30) bg = "bg-gray-500 text-white";
+                                                    if(num > 40) bg = "bg-green-500 text-white";
+                                                    return <div key={idx} className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shadow-sm ${bg}`}>{num}</div>
+                                                })}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'booking' && (
+                            <div className="h-full flex flex-col bg-gray-50">
+                                <div className="h-40 bg-indigo-900 p-5 flex flex-col justify-end text-white relative">
+                                    <span className="bg-indigo-600 text-[10px] font-bold px-2 py-1 rounded w-fit mb-2">직영점</span>
+                                    <h2 className="text-2xl font-bold">안산 익스럭스 체험관</h2>
+                                </div>
+                                <div className="p-5">
+                                    <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 shadow-sm">
+                                        <h4 className="font-bold text-yellow-800 text-sm mb-1 flex items-center gap-1"><Icons.Gift /> 방문 예약 이벤트</h4>
+                                        <p className="text-xs text-yellow-700">예약 후 현장 방문 시 <span className="font-bold underline">무료 로또 5장</span> 즉시 지급!</p>
+                                    </div>
+                                    <h3 className="font-bold text-gray-800 mb-3 text-sm">시간 선택 (2월 26일)</h3>
+                                    <div className="grid grid-cols-3 gap-3 mb-6">
+                                        {['10:00', '11:00', '14:00', '15:00', '16:00', '17:00'].map(time => (
+                                            <button key={time} className="py-3 rounded-lg border font-medium text-sm bg-white text-gray-700 active:bg-indigo-50">{time}</button>
+                                        ))}
+                                    </div>
+                                    <button onClick={handleBooking} className="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95">예약 확정하고 로또 5장 받기</button>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {activeTab === 'mypage' && (
+                            <div className="p-5">
+                                <div className="flex items-center gap-4 mb-8">
+                                    <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center"><Icons.User /></div>
+                                    <div>
+                                        <h2 className="text-xl font-bold">홍길동 님</h2>
+                                        <p className="text-sm text-gray-500">hgd_1234@kakao.com</p>
+                                    </div>
+                                </div>
+                                <div className="space-y-3">
+                                    <div className="bg-white p-4 rounded-xl shadow-sm border font-medium flex justify-between items-center text-sm">공지사항 <Icons.ChevronRight /></div>
+                                    <div className="bg-white p-4 rounded-xl shadow-sm border font-medium flex justify-between items-center text-sm">고객 센터 <Icons.ChevronRight /></div>
+                                    <div className="bg-white p-4 rounded-xl shadow-sm border font-medium flex justify-between items-center text-red-500 text-sm">로그아웃 <Icons.ChevronRight /></div>
+                                </div>
+                            </div>
+                        )}
+                    </main>
+
+                    {/* 하단 탭바 */}
+                    <nav className="bg-white border-t border-gray-200 w-full flex justify-around items-center h-[68px] pb-safe z-20 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+                        {[
+                            { id: 'home', icon: <Icons.Home />, label: '홈' },
+                            { id: 'wallet', icon: <Icons.Ticket />, label: '내 로또', badge: tickets.length },
+                            { id: 'booking', icon: <Icons.Calendar />, label: '체험관', badge: 'HOT' },
+                            { id: 'mypage', icon: <Icons.User />, label: 'MY' }
+                        ].map(tab => (
+                            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className="flex flex-col items-center justify-center w-full h-full relative">
+                                <div className={activeTab === tab.id ? 'text-indigo-600' : 'text-gray-400'}>{tab.icon}</div>
+                                <span className={`text-[10px] mt-1 ${activeTab === tab.id ? 'text-indigo-600 font-bold' : 'text-gray-500'}`}>{tab.label}</span>
+                                {tab.badge && <span className="absolute top-1 right-3 bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">{tab.badge}</span>}
+                            </button>
+                        ))}
+                    </nav>
+
+                    {/* 모달: 광고 시청 */}
+                    {isAdWatching && (
+                        <div className="absolute inset-0 bg-black/95 z-50 flex flex-col items-center justify-center p-6">
+                            <p className="text-white text-lg font-bold mb-6 text-center">광고 시청 중입니다.</p>
+                            <div className="w-full max-w-[280px] bg-gray-800 h-60 rounded-xl mb-8 flex items-center justify-center border border-gray-700"><Icons.Play /></div>
+                            <div className="w-full max-w-[280px]">
+                                <div className="flex justify-between text-white text-sm mb-2"><span>진행률</span><span>{progress}%</span></div>
+                                <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+                                    <div className="bg-indigo-500 h-full transition-all duration-300" style={{ width: `${adProgress}%` }}></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 모달: 보상 지급 */}
+                    {showRewardModal && (
+                        <div className="absolute inset-0 bg-black/70 z-50 flex items-center justify-center p-5">
+                            <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden p-6 text-center relative">
+                                <button onClick={() => setShowRewardModal(false)} className="absolute top-4 right-4 text-gray-400"><Icons.X /></button>
+                                <h2 className="text-2xl font-black text-gray-800 mt-4 mb-1">발급 완료!</h2>
+                                <p className="text-gray-600 mb-6 text-sm">로또 1게임이 지갑에 들어왔어요.</p>
+                                
+                                <div onClick={() => { setShowRewardModal(false); setActiveTab('booking'); }} className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl p-4 text-left text-white shadow-inner active:scale-95 transition-transform">
+                                    <span className="bg-red-600 text-[10px] font-black px-2 py-1 rounded-sm mb-2 inline-block">스페셜 오퍼</span>
+                                    <h3 className="font-bold text-lg leading-tight mb-2">당첨 확률을 확! 높이려면?</h3>
+                                    <p className="text-xs text-yellow-100 mb-4">안산 체험관 예약하고 5장 더 받기</p>
+                                    <button className="bg-white text-orange-600 font-bold text-sm py-2 w-full rounded-lg shadow-md flex justify-center items-center gap-1">바로 예약하기 <Icons.ChevronRight/></button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
