@@ -198,23 +198,24 @@
 
         .history-nums {
             display: flex;
-            gap: 6px;
-            flex-wrap: wrap; 
+            gap: 4px;
+            flex-wrap: nowrap; /* 무조건 한 줄 유지 */
         }
 
         /* 6-B. 번호공 (동행복권 볼 컬러 5종 복원) */
         .num-badge {
-            width: 26px;
-            height: 26px;
+            width: 24px; /* 기존 26px에서 약간 축소하여 공간 확보 */
+            height: 24px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 12px;
+            font-size: 11px; /* 폰트 약간 축소 */
             font-weight: 800;
             color: #fff;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.4); /* 숫자 가독성 */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
             box-shadow: inset -1px -1px 3px rgba(0,0,0,0.3);
+            flex-shrink: 0; /* 공 모양 안 찌그러지게 고정 */
         }
 
         /* -------------------------------------
@@ -246,12 +247,13 @@
 
         /* 6-C. 카드 오른쪽 박스 (상태/결과) */
         .history-status {
-            padding: 12px 18px;
+            padding: 8px 12px;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 12px; /* 좁은 공간 대응 (14 -> 12) */
             font-weight: 800;
             text-align: center;
-            white-space: nowrap;
+            white-space: nowrap; /* 글씨 꺾임 방지 */
+            flex-shrink: 0; /* 버튼 압착 방지 */
             /* 기본값: "다음에!" 상태 */
             background: #2a2a2a; 
             color: #888;
@@ -367,7 +369,7 @@
                 </div>
             </section>
 
-            <div class="list-header">획득한 무료 로또 내역</div>
+            <div class="list-header">나눔 로또 저장 내역</div>
 
             <!-- 자바스크립트로 내역이 그려질 타겟 컨테이너 -->
             <div class="history-list" id="history-list-container">
