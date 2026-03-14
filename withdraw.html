@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>출금신청 - 무료 나눔 로또</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-card: #1e1e1e;
+            --gold-gradient: linear-gradient(135deg, #FFD700 0%, #FF8C00 100%);
+            --gold-light: #FFD700;
+            --text-main: #ffffff;
+            --text-sub: #a0a0a0;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --nav-bg: rgba(18, 18, 18, 0.95);
+            --accent-red: #ff4d4d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at top right, rgba(255, 215, 0, 0.05), transparent 40%),
+                radial-gradient(circle at bottom left, rgba(255, 140, 0, 0.05), transparent 40%);
+            /* Prevent scrolling on body, allow in container */
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px; /* Suitable for mobile testing */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background-color: var(--bg-dark);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            overflow-y: auto;
+            overflow-x: hidden;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .app-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* HEADER */
+        .header {
+            padding: 20px 24px;
+            background: rgba(18, 18, 18, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+        }
+
+        .btn-back {
+            color: #fff;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.5px;
+            flex: 1;
+            text-align: center;
+            margin-right: 20px; /* offset for back button to center title */
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            padding: 24px 20px 120px; /* Increased bottom padding for nav and button */
+        }
+
+        /* TOP AMOUNT */
+        .withdraw-amount-container {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .amount-label {
+            font-size: 14px;
+            color: var(--text-sub);
+            margin-bottom: 8px;
+        }
+
+        .amount-value {
+            font-size: 32px;
+            font-weight: 800;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        /* INFO BOX */
+        .info-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 30px;
+        }
+
+        .info-box-title {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--gold-light);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-list {
+            list-style: none;
+            font-size: 12px;
+            color: var(--text-sub);
+            line-height: 1.6;
+        }
+
+        .info-list li {
+            position: relative;
+            padding-left: 12px;
+            margin-bottom: 6px;
+        }
+        
+        .info-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #fff;
+        }
+
+        .highlight-red {
+            color: var(--accent-red);
+            font-weight: 600;
+        }
+
+        /* FORM SECTION */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 14px 16px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: 'Pretendard', sans-serif;
+            transition: all 0.2s;
+            appearance: none;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--gold-light);
+            background: rgba(0,0,0,0.5);
+        }
+
+        .form-control::placeholder {
+            color: #555;
+        }
+
+        /* Common form control styles */
+        .form-control {
+            appearance: none;
+        }
+
+        /* Hide number spinners */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield; /* Firefox */
+        }
+
+        /* UPLOAD & VERIFY BUTTONS */
+        .upload-section {
+            margin-bottom: 24px;
+        }
+
+        .upload-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-upload {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 8px 0;
+            border-radius: 10px;
+            color: #ddd;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-upload .icon {
+            font-size: 18px;
+        }
+
+        .btn-upload:active {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .btn-upload.done {
+            border-color: var(--gold-light);
+            color: var(--gold-light);
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        /* MAIN CTA */
+        .btn-submit {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background: var(--gold-gradient);
+            color: #000;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 800;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(255, 140, 0, 0.4);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-submit:active {
+            transform: translateY(2px);
+            box-shadow: 0 4px 10px rgba(255, 140, 0, 0.4);
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-box {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 320px;
+            padding: 24px;
+            text-align: center;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: var(--gold-light);
+        }
+
+        .modal-desc {
+            font-size: 14px;
+            color: var(--text-sub);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .btn-modal {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            background: var(--gold-gradient);
+            color: #000;
+        }
+
+        /* BOTTOM NAVIGATION */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 70px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 20;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-sub);
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: var(--gold-light);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+        
+        .nav-text {
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* Responsive max-width 360px (Galaxy S8+, older devices) */
+        @media screen and (max-width: 360px) {
+            .main-content { padding: 20px 16px 90px; }
+            .amount-value { font-size: 28px; }
+            .info-box { padding: 12px; }
+            .info-list { font-size: 11px; }
+            .form-control { padding: 12px 14px; font-size: 14px; }
+            .btn-upload { padding: 10px 0; font-size: 11px; flex-direction: column; }
+            .btn-upload .icon { font-size: 16px; }
+            .btn-submit { padding: 16px; font-size: 15px; }
+            .bottom-nav { height: 60px; }
+            .nav-icon { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header class="header">
+            <a href="mypage.html" class="btn-back">←</a>
+            <div class="header-title">출금신청</div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            
+            <!-- Top Amount -->
+            <div class="withdraw-amount-container">
+                <div class="amount-label">출금 가능 포인트</div>
+                <div class="amount-value">150,000 원</div>
+            </div>
+
+            <!-- Information Box -->
+            <div class="info-box">
+                <div class="info-box-title">💡 출금 시 꼭 확인해주세요!</div>
+                <ul class="info-list">
+                    <li><span class="highlight-red">50,000원 미만</span>: <br>본인 인증 + 통장 사본 업로드 후 출금 가능</li>
+                    <li><span class="highlight-red">50,000원 이상</span>: <br>본인 인증 + 신분증/통장 사본 업로드 + 제세공과금 22% 공제</li>
+                </ul>
+            </div>
+
+            <!-- Form -->
+            <div class="form-group">
+                <label class="form-label">입금 은행</label>
+                <input type="text" class="form-control" placeholder="은행명을 직접 입력해주세요 (예: 국민은행)">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">계좌번호</label>
+                <input type="number" class="form-control" placeholder="'-' 없이 입력해주세요">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">예금주</label>
+                <input type="text" class="form-control" placeholder="성함을 입력해주세요">
+            </div>
+
+            <!-- Auth & Uploads -->
+            <div class="upload-section">
+                <label class="form-label">필수 인증 및 서류 업로드</label>
+                <div class="upload-buttons">
+                    <div class="btn-upload" onclick="toggleUpload(this)">
+                        <span class="icon">📱</span>
+                        <span>본인인증</span>
+                    </div>
+                    <div class="btn-upload" onclick="toggleUpload(this)">
+                        <span class="icon">🏦</span>
+                        <span>통장사본</span>
+                    </div>
+                    <div class="btn-upload" onclick="toggleUpload(this)">
+                        <span class="icon">🪪</span>
+                        <span>신분증</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button class="btn-submit" onclick="openSuccessModal()">
+                출금신청
+            </button>
+
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="home.html" class="nav-item">
+                <div class="nav-icon">🏠</div>
+                <span class="nav-text">홈</span>
+            </a>
+            <a href="list.html" class="nav-item">
+                <div class="nav-icon">📺</div>
+                <span class="nav-text">나눔로또</span>
+            </a>
+            <!-- Active State applies here (Since it's part of MyPage flow) -->
+            <a href="mypage.html" class="nav-item active">
+                <div class="nav-icon">👤</div>
+                <span class="nav-text">마이페이지</span>
+            </a>
+        </nav>
+
+        <!-- Success Modal -->
+        <div class="modal-overlay" id="success-modal">
+            <div class="modal-box" style="padding: 30px 24px;">
+                <div style="font-size: 40px; margin-bottom: 16px;">✅</div>
+                <div style="font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 20px; line-height: 1.4;">
+                    출금 신청 완료 되었습니다.
+                </div>
+                <div style="font-size: 15px; color: var(--text-sub); margin-bottom: 12px; line-height: 1.6;">
+                    신청하신 금액은 <span style="color: var(--gold-light); font-weight: 800;">24시간 이내에</span><br>
+                    입금 처리 됩니다.
+                </div>
+                <div style="font-size: 13px; color: #777; margin-bottom: 30px;">
+                    축하드립니다. 감사합니다.
+                </div>
+                <button class="btn-modal" onclick="closeModalAndGoHome()">닫기</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Simple toggle function to simulate file upload / auth completion
+        function toggleUpload(element) {
+            element.classList.toggle('done');
+            if(element.classList.contains('done')) {
+                // Change text roughly to show completion
+                const span = element.querySelector('span:nth-child(2)');
+                if(span.innerText === '본인인증') span.innerText = '인증완료';
+                if(span.innerText === '통장사본') span.innerText = '업로드됨';
+                if(span.innerText === '신분증') span.innerText = '업로드됨';
+            } else {
+                const span = element.querySelector('span:nth-child(2)');
+                if(span.innerText === '인증완료') span.innerText = '본인인증';
+                if(span.innerText === '업로드됨') span.innerText = span.parentElement.querySelector('.icon').innerText === '🏦' ? '통장사본' : '신분증';
+            }
+        }
+
+        const modal = document.getElementById('success-modal');
+
+        function openSuccessModal() {
+            modal.classList.add('active');
+        }
+
+        function closeModalAndGoHome() {
+            modal.classList.remove('active');
+            window.location.href = 'home.html'; // Go back to home as requested
+        }
+    </script>
+</body>
+</html>
