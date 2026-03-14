@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>마이페이지 - 무료 나눔 로또</title>
+    <!-- 폰트 적용 (Pretendard) -->
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --text-main: #ffffff;
+            --text-sub: #a0a0a0;
+            --border-color: #2a2a2a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: transparent;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* 1. 모바일 앱 형태의 메인 컨테이너 (정중앙형, 짙은 흑색 배경 고정) */
+        .app-container {
+            width: 100%;
+            max-width: 430px; /* 기존 420px에서 사진처럼 시원하게 확장 */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background-color: var(--bg-dark); /* 이미지와 같은 완전 흑색 계열 */
+            overflow: hidden;
+        }
+
+        /* 2. 상단 헤더: '마이페이지' */
+        .header {
+            padding: 24px 0;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        /* 3. 스크롤 가능한 메인 화면 */
+        .main-content {
+            flex: 1;
+            padding-bottom: 20px;
+            overflow-y: auto;
+            -ms-overflow-style: none; /* IE, Edge */
+            scrollbar-width: none; /* Firefox */
+        }
+        
+        .main-content::-webkit-scrollbar {
+            display: none; /* Chrome, Safari */
+        }
+
+        /* 4. 상단 통계 구역 (최신 당첨 번호) */
+        .stats-section {
+            background: #1a1a1a;
+            border-bottom: 1px solid #2a2a2a;
+            padding: 24px 20px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .stats-title {
+            font-size: 15px;
+            color: var(--text-sub);
+            margin-bottom: 14px;
+            font-weight: 600;
+        }
+        
+        .stats-highlight {
+            color: #fff;
+            font-weight: 800;
+        }
+
+        .ball-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lotto-plus {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-sub);
+            margin: 0 4px;
+        }
+
+        /* 보너스 볼 외곽선 하이라이트 */
+        .bonus-ball {
+            box-shadow: 0 0 10px rgba(255,215,0,0.5);
+            border: 2px solid #FFD700;
+        }
+
+        /* 4-A. 출금 가능 포인트 표시 (요청사항 반영) */
+        .points-wrapper {
+            margin-top: 24px;
+            padding-top: 24px;
+            display: flex;
+            background: rgba(255, 255, 255, 0.04); 
+            border-radius: 12px;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px; /* 간격 살짝 띄움 */
+        }
+
+        .points-label {
+            font-size: 15px; /* 라벨 크기 증가 */
+            color: #aaa;
+            font-weight: 600;
+        }
+
+        .points-value {
+            font-size: 38px; /* 폰트 대폭 확대 */
+            font-weight: 800; /* 제일 굵게 */
+            color: #ffcc00; 
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+            letter-spacing: -1px; /* 자간을 좁혀 밀도있게 */
+        }
+
+        .points-unit {
+            font-size: 20px; /* 단위 '원' 크기 증가 */
+            color: #fff;
+            letter-spacing: 0;
+            font-weight: 600;
+        }
+
+        /* 5. 리스트 제목: '획득한 무료 로또 내역' */
+        .list-header {
+            font-size: 18px;
+            font-weight: 800;
+            margin: 24px 24px 16px 24px;
+            color: #fff;
+        }
+
+        /* 5. 로또 리스트 래퍼 (세로 스택 무조건 강제 적용) */
+        .history-list {
+            display: flex;
+            flex-direction: column; /* 세로스택 강제 (옆으로 퍼짐 절대 방지) */
+            gap: 16px;
+            padding: 0 24px 40px 24px;
+        }
+
+        /* 6. 카드 컨테이너 (이미지 재현) */
+        .history-card {
+            background: #1a1a1a; /* 짙은 회색 기본 베이스 */
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between; /* 날짜/숫자는 왼쪽, 축하박스는 오른쪽 끝으로 */
+            align-items: center; /* 높이 중앙정렬 */
+            width: 100%; /* 앱 너비 꽉 채움 */
+        }
+
+        /* 6-A. 카드 왼쪽 묶음 (회차/날짜 + 번호 리스트) */
+        .history-left {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .history-top {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }
+
+        .history-round {
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .history-date {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .history-nums {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap; 
+        }
+
+        /* 6-B. 번호공 (동행복권 볼 컬러 5종 복원) */
+        .num-badge {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.4); /* 숫자 가독성 */
+            box-shadow: inset -1px -1px 3px rgba(0,0,0,0.3);
+        }
+
+        /* -------------------------------------
+           상단 통계용 대형 로또 공 사이즈 덮어쓰기
+           ------------------------------------- */
+        .stats-ball {
+            width: 36px !important;
+            height: 36px !important;
+            font-size: 15px !important;
+        }
+        
+        /* 볼 기본 컬러 클래스 */
+        .ball-yellow { background: linear-gradient(135deg, #fbc400, #e6a000); }
+        .ball-blue { background: linear-gradient(135deg, #69c8f2, #1b8adb); }
+        .ball-red { background: linear-gradient(135deg, #ff7272, #d93d3d); }
+        .ball-gray { background: linear-gradient(135deg, #aaaaaa, #777777); }
+        .ball-green { background: linear-gradient(135deg, #b0d840, #7caf1a); }
+        
+        /* 일치하는 번호 전용 색상 덮어쓰기 로직용 */
+        .num-match-yellow {
+            background: #ffcc00 !important;
+            color: #000 !important;
+        }
+
+        .num-match-blue {
+            background: #69c8f2 !important;
+            color: #000 !important;
+        }
+
+        /* 6-C. 카드 오른쪽 박스 (상태/결과) */
+        .history-status {
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 800;
+            text-align: center;
+            white-space: nowrap;
+            /* 기본값: "다음에!" 상태 */
+            background: #2a2a2a; 
+            color: #888;
+            border: 1px solid transparent; /* 공간유지 */
+        }
+
+        /* 당첨 시 (사진속 빨간 테두리+검정(투명) 배경) */
+        .status-win {
+            color: #ff4d4d;
+            background: transparent;
+            border: 1px solid rgba(255, 77, 77, 0.4);
+        }
+        
+        /* 추첨 대기 (사진 속 노란색 꽉 찬 버튼 스타일 반영) */
+        .status-wait {
+            color: #000;
+            background: #ffcc00;
+            border: none;
+        }
+
+        /* 7. 대형 하단 노란색 버튼 블록 (사진과 100% 동일하게 배치) */
+        .withdraw-wrapper {
+            padding: 0 24px 30px 24px;
+        }
+
+        .btn-withdraw {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 64px; /* 통통한 버튼 */
+            background: linear-gradient(135deg, #FFD700 0%, #FF8C00 100%);
+            color: #000;
+            border: none;
+            border-radius: 16px;
+            font-size: 17px;
+            font-weight: 800;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-withdraw:active {
+            transform: translateY(2px);
+        }
+
+        /* 8. 하단 네비게이션 탭 바 */
+        .bottom-nav {
+            width: 100%;
+            height: 70px;
+            background: #181818;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #666; /* 비활성화 탭 */
+            text-decoration: none;
+        }
+
+        .nav-item.active {
+            color: #ffcc00; /* 사진속 활성화된 '마이페이지' 탭 */
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+        
+        .nav-text {
+            font-size: 11px;
+            font-weight: 800;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- 고정 헤더 -->
+        <header class="header">
+            <div class="header-title">마이페이지</div>
+        </header>
+
+        <!-- 스크롤 가능 메인 리스트 영역 -->
+        <main class="main-content">
+            
+            <!-- 상단: 지난주 당첨 결과 & 출금 포인트 -->
+            <section class="stats-section">
+                <!-- 제-회 추첨 결과 반영 -->
+                <div class="stats-title">제<span id="my-latest-round" class="stats-highlight">-</span>회 추첨 결과</div>
+                <div class="ball-row" id="my-latest-balls">
+                    <!-- JS에서 볼이 동적으로 삽입됨 -->
+                </div>
+
+                <!-- 출금 가능 포인트 -->
+                <div class="points-wrapper">
+                    <div class="points-label">출금 가능 포인트</div>
+                    <div class="points-value">140,000<span class="points-unit">원</span></div>
+                </div>
+            </section>
+
+            <div class="list-header">획득한 무료 로또 내역</div>
+
+            <!-- 자바스크립트로 내역이 그려질 타겟 컨테이너 -->
+            <div class="history-list" id="history-list-container">
+                <!-- 로딩 중 또는 데이터 없을 때 기본 메시지 -->
+                <div style="text-align:center; padding: 40px 0; color: #888; font-size: 14px;">저장된 로또 번호가 없습니다.</div>
+            </div>
+
+            <!-- 하단 꽉찬 출금 버튼 -->
+            <div class="withdraw-wrapper">
+                <a href="withdraw.html" class="btn-withdraw">
+                    💸 당첨금 받으러가자~~
+                </a>
+            </div>
+
+        </main>
+
+        <!-- 하단 탭 바 (마이페이지 켜놓음) -->
+        <nav class="bottom-nav">
+            <a href="home.html" class="nav-item">
+                <div class="nav-icon">🏠</div>
+                <span class="nav-text">홈</span>
+            </a>
+            <a href="list.html" class="nav-item">
+                <div class="nav-icon">📺</div>
+                <span class="nav-text">나눔로또</span>
+            </a>
+            <a href="mypage.html" class="nav-item active">
+                <div class="nav-icon">👤</div>
+                <span class="nav-text">마이페이지</span>
+            </a>
+        </nav>
+
+    </div>
+
+    <!-- 로직 스크립트: 로컬스토리지 데이터를 사진 모양대로 그리기 -->
+    <script>
+        // 볼 번호에 따른 색상 클래스 반환
+        function getBallColorClass(num) {
+            if (num <= 10) return 'ball-yellow';
+            if (num <= 20) return 'ball-blue';
+            if (num <= 30) return 'ball-red';
+            if (num <= 40) return 'ball-gray';
+            return 'ball-green';
+        }
+
+        // API 패치 유틸
+        async function fetchLottoRound(drwNo) {
+            try {
+                let res = await fetch(`https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=${drwNo}`);
+                if (!res.ok) throw new Error("Network/CORS Error");
+                let data = await res.json();
+                if (data.returnValue === 'success') {
+                    return data;
+                }
+                return null;
+            } catch (e) {
+                // 망에러 나면 그냥 임의 당첨번호 넣어서 시연 (사진과 동일하게 비교를 위해)
+                return {
+                    drwNo: drwNo,
+                    drwtNo1: 7, drwtNo2: 15, drwtNo3: 23, drwtNo4: 30, drwtNo5: 38, drwtNo6: 42,
+                    bnusNo: 11
+                };
+            }
+        }
+
+        async function initMyPage() {
+            // 현재 회차 및 기본 동기화 구조 세팅
+            const firstDraw = new Date('2002-12-07T20:45:00+09:00').getTime();
+            const now = new Date().getTime();
+            let latestDrwNo = Math.floor((now - firstDraw) / (1000 * 60 * 60 * 24 * 7)) + 1;
+
+            let latestData = await fetchLottoRound(latestDrwNo);
+            if (!latestData) {
+                latestDrwNo--;
+                latestData = await fetchLottoRound(latestDrwNo);
+            }
+            if (!latestData) {
+                latestData = { drwNo: latestDrwNo, drwtNo1: 7, drwtNo2: 15, drwtNo3: 23, drwtNo4: 30, drwtNo5: 38, drwtNo6: 42, bnusNo: 11 };
+            }
+
+            const roundCache = {};
+            roundCache[latestData.drwNo] = latestData;
+
+            // 상단 당첨번호 UI 업데이트 (제-회 추첨 결과 포맷)
+            const roundText = document.getElementById('my-latest-round');
+            if(roundText) roundText.innerText = latestData.drwNo;
+            
+            const myLatestBalls = document.getElementById('my-latest-balls');
+            if(myLatestBalls) {
+                myLatestBalls.innerHTML = '';
+                const nums = [latestData.drwtNo1, latestData.drwtNo2, latestData.drwtNo3, latestData.drwtNo4, latestData.drwtNo5, latestData.drwtNo6];
+                nums.forEach(n => {
+                    const div = document.createElement('div');
+                    div.className = `num-badge stats-ball ${getBallColorClass(n)}`; // 상단용 대형 클래스 추가
+                    div.innerText = n;
+                    myLatestBalls.appendChild(div);
+                });
+
+                const plus = document.createElement('div');
+                plus.className = 'lotto-plus';
+                plus.innerText = '+';
+                myLatestBalls.appendChild(plus);
+
+                const bonus = document.createElement('div');
+                bonus.className = `num-badge stats-ball ${getBallColorClass(latestData.bnusNo)} bonus-ball`; // 대형 클래스 추가
+                bonus.innerText = latestData.bnusNo;
+                myLatestBalls.appendChild(bonus);
+            }
+
+            // 로컬스토리지 호출
+            const historyStr = localStorage.getItem('myLottoHistory') || '[]';
+            let history = [];
+            try {
+                history = JSON.parse(historyStr);
+            } catch(e) {}
+
+            const container = document.getElementById('history-list-container');
+            if(!container) return;
+            container.innerHTML = '';
+
+            // 로컬에 저장이 1건도 없다면 데모 데이터를 7개 주입하고 진짜로 스토리지에 저장 (초기화면 요건)
+            if (history.length === 0) {
+                history = [
+                    { date: '2026.03.14', numbers: [12, 18, 22, 31, 40, 45], timestamp: new Date('2026-03-12T10:00:00').getTime() },
+                    { date: '2026.03.07', numbers: [7, 15, 23, 30, 38, 42], timestamp: new Date('2026-03-07T10:00:00').getTime() },
+                    { date: '2026.03.06', numbers: [2, 11, 19, 25, 35, 41], timestamp: new Date('2026-03-06T10:00:00').getTime() },
+                    { date: '2026.02.28', numbers: [4, 15, 22, 33, 38, 44], timestamp: new Date('2026-02-28T10:00:00').getTime() },
+                    { date: '2026.02.27', numbers: [5, 8, 17, 20, 39, 42], timestamp: new Date('2026-02-27T10:00:00').getTime() },
+                    { date: '2026.02.21', numbers: [8, 14, 28, 29, 34, 40], timestamp: new Date('2026-02-21T10:00:00').getTime() },
+                    { date: '2026.02.20', numbers: [3, 16, 21, 22, 30, 38], timestamp: new Date('2026-02-20T10:00:00').getTime() }
+                ];
+                localStorage.setItem('myLottoHistory', JSON.stringify(history));
+            }
+
+            // [핵심] 신규 저장 로직: 타임스탬프 기준 내림차순 정렬 (새 번호가 무조건 최상단에 오도록 강제)
+            history.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+            // 배열 루프 돌면서 HTML 노드를 만들어서 꽂아넣기
+            for (let record of history) {
+                const recordTime = record.timestamp || new Date().getTime();
+                let recordDrwNo = Math.floor((recordTime - firstDraw) / (1000 * 60 * 60 * 24 * 7)) + 1;
+
+                // 1. 전체 카드 껍데기
+                const card = document.createElement('div');
+                card.className = 'history-card';
+                
+                // 2. 왼쪽 구역 (날짜+공)
+                const leftDiv = document.createElement('div');
+                leftDiv.className = 'history-left';
+                
+                const header = document.createElement('div');
+                header.className = 'history-top';
+                
+                const roundDiv = document.createElement('div');
+                roundDiv.className = 'history-round';
+                roundDiv.innerText = `${recordDrwNo}회차`;
+
+                const dateDiv = document.createElement('div');
+                dateDiv.className = 'history-date';
+                dateDiv.innerText = record.date.substring(0, 10); // 시간 자르고 날짜만 (이미지 대응)
+                
+                header.appendChild(roundDiv);
+                header.appendChild(dateDiv);
+                
+                const numsDiv = document.createElement('div');
+                numsDiv.className = 'history-nums';
+                
+                // 공 생성 (해당 번호에 맞는 컬러 볼)
+                const userNumEls = [];
+                record.numbers.forEach(num => {
+                    const badge = document.createElement('div');
+                    // 번호에 따른 색상 클래스 즉시 부여
+                    badge.className = `num-badge ${getBallColorClass(num)}`;
+                    badge.innerText = num;
+                    numsDiv.appendChild(badge);
+                    userNumEls.push(badge);
+                });
+                
+                leftDiv.appendChild(header);
+                leftDiv.appendChild(numsDiv);
+
+                // 3. 오른쪽 상태 구역 (버튼)
+                const statusDiv = document.createElement('div');
+                statusDiv.className = 'history-status'; // 베이스 스타일
+                
+                card.appendChild(leftDiv);
+                card.appendChild(statusDiv);
+                container.appendChild(card);
+                
+                // 4. 추첨대기/당첨 비교 로직
+                if (recordDrwNo > latestData.drwNo) {
+                    statusDiv.classList.add('status-wait');
+                    statusDiv.innerText = '추첨대기';
+                    continue;
+                }
+
+                let drawData = roundCache[recordDrwNo];
+                if (!drawData) {
+                    drawData = await fetchLottoRound(recordDrwNo);
+                    if (drawData) roundCache[recordDrwNo] = drawData;
+                }
+
+                if (drawData) {
+                    let matchCount = 0;
+                    let hasBonus = false;
+                    const winNums = [drawData.drwtNo1, drawData.drwtNo2, drawData.drwtNo3, drawData.drwtNo4, drawData.drwtNo5, drawData.drwtNo6];
+                    
+                    userNumEls.forEach(el => {
+                        const val = parseInt(el.innerText);
+                        if (winNums.includes(val)) {
+                            matchCount++;
+                            el.classList.add('num-match-yellow'); // 노란색으로 덮어씀 (css !important 보장)
+                        } else if (val === drawData.bnusNo) {
+                            hasBonus = true;
+                            el.classList.add('num-match-blue'); // 불루
+                        }
+                    });
+
+                    let resultMsg = '추첨대기';
+                    statusDiv.classList.add('status-wait'); // 추첨대기 기본값(노란색) 적용
+
+                    if (matchCount === 6) { resultMsg = '축하! (1등)'; statusDiv.className = 'history-status status-win'; }
+                    else if (matchCount === 5 && hasBonus) { resultMsg = '축하! (2등)'; statusDiv.className = 'history-status status-win'; }
+                    else if (matchCount === 5) { resultMsg = '축하! (3등)'; statusDiv.className = 'history-status status-win'; }
+                    else if (matchCount === 4) { resultMsg = '축하! (4등)'; statusDiv.className = 'history-status status-win'; }
+                    else if (matchCount === 3) { resultMsg = '축하! (5등)'; statusDiv.className = 'history-status status-win'; }
+                    // 당첨 실패 케이스 처리
+                    else { statusDiv.className = 'history-status status-wait'; resultMsg = '추첨대기'; } 
+
+                    statusDiv.innerText = resultMsg;
+                } else {
+                    statusDiv.className = 'history-status status-wait';
+                    statusDiv.innerText = '추첨대기';
+                }
+            }
+        }
+        
+        // 스크립트 실행
+        initMyPage();
+    </script>
+</body>
+</html>

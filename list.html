@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>광고 리스트 - 무료 나눔 로또</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-card: #1e1e1e;
+            --gold-gradient: linear-gradient(135deg, #FFD700 0%, #FF8C00 100%);
+            --gold-light: #FFD700;
+            --text-main: #ffffff;
+            --text-sub: #a0a0a0;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --nav-bg: rgba(18, 18, 18, 0.95);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at top right, rgba(255, 215, 0, 0.05), transparent 40%),
+                radial-gradient(circle at bottom left, rgba(255, 140, 0, 0.05), transparent 40%);
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px; /* Suitable for mobile testing */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background-color: var(--bg-dark);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            overflow-y: auto;
+            overflow-x: hidden;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .app-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* HEADER */
+        .header {
+            padding: 20px 24px;
+            position: sticky;
+            top: 0;
+            background: rgba(18, 18, 18, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            padding: 16px 16px 100px; /* 마지막 아이템이 하단 바에 안 가려지게 여백 확보 */
+            overflow-y: auto; /* 세로 스크롤 활성화 */
+            -ms-overflow-style: none; /* 스크롤바 숨기기 (IE/Edge) */
+            scrollbar-width: none; /* 스크롤바 숨기기 (Firefox) */
+        }
+        
+        .main-content::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+
+        /* LIST ITEM */
+        .ad-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ad-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .ad-item:active {
+            transform: scale(0.98);
+            background: #252525;
+        }
+
+        .ad-num {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-sub);
+            width: 20px;
+            text-align: center;
+        }
+
+        .ad-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            min-width: 0; /* Ensures truncation works */
+        }
+
+        .ad-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.4;
+        }
+
+        .ad-desc {
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-top: 4px;
+        }
+
+        .btn-get-lotto {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--gold-light);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-get-lotto:active {
+            background: var(--gold-gradient);
+            color: #000;
+            border-color: transparent;
+        }
+
+        /* BOTTOM NAVIGATION */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 70px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 20;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-sub);
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: var(--gold-light);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+        
+        .nav-text {
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* Responsive max-width 360px (Galaxy S8+, older devices) */
+        @media screen and (max-width: 360px) {
+            .ad-item {
+                padding: 12px;
+                gap: 8px;
+            }
+            .ad-title {
+                font-size: 14px;
+            }
+            .btn-get-lotto {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+            .bottom-nav { height: 60px; }
+            .nav-icon { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header class="header">
+            <div class="header-title">나눔 무료 로또 받기</div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            
+            <div class="ad-list">
+                
+                <!-- Ad Item 1 -->
+                <div class="ad-item">
+                    <span class="ad-num">1</span>
+                    <div class="ad-info">
+                        <div class="ad-title">세포를 재생하는 익스럭스 전주 체험관</div>
+                        <div class="ad-desc">방문 예약 가능</div>
+                    </div>
+                    <a href="ads.html" class="btn-get-lotto">로또받기</a>
+                </div>
+
+                <!-- Ad Item 2 -->
+                <div class="ad-item">
+                    <span class="ad-num">2</span>
+                    <div class="ad-info">
+                        <div class="ad-title">프리미엄 안마의자 렌탈 특가 찬스</div>
+                        <div class="ad-desc">상담 및 신청</div>
+                    </div>
+                    <a href="ads.html" class="btn-get-lotto">로또받기</a>
+                </div>
+
+                <!-- Ad Item 3 -->
+                <div class="ad-item">
+                    <span class="ad-num">3</span>
+                    <div class="ad-info">
+                        <div class="ad-title">100% 당첨 룰렛 이벤트 참여하기</div>
+                        <div class="ad-desc">가입 후 즉시 참여</div>
+                    </div>
+                    <a href="ads.html" class="btn-get-lotto">로또받기</a>
+                </div>
+
+                <!-- Ad Item 4 -->
+                <div class="ad-item">
+                    <span class="ad-num">4</span>
+                    <div class="ad-info">
+                        <div class="ad-title">신규 오픈! 프리미엄 헬스장 1개월 무료</div>
+                        <div class="ad-desc">방문 예약 가능</div>
+                    </div>
+                    <a href="ads.html" class="btn-get-lotto">로또받기</a>
+                </div>
+
+                <!-- Ad Item 5 -->
+                <div class="ad-item">
+                    <span class="ad-num">5</span>
+                    <div class="ad-info">
+                        <div class="ad-title">어린이 영어회화 무료 체험 수업</div>
+                        <div class="ad-desc">초등학생 대상</div>
+                    </div>
+                    <a href="ads.html" class="btn-get-lotto">로또받기</a>
+                </div>
+
+                <!-- Ad Item 6 -->
+                <div class="ad-item">
+                    <span class="ad-num">6</span>
+                    <div class="ad-info">
+                        <div class="ad-title">자동차 보험료 최대 30% 할인 견적</div>
+                        <div class="ad-desc">1분 간편 조회</div>
+                    </div>
+                    <a href="ads.html" class="btn-get-lotto">로또받기</a>
+                </div>
+                
+                <!-- Ad Item 7 -->
+                <div class="ad-item">
+                    <span class="ad-num">7</span>
+                    <div class="ad-info">
+                        <div class="ad-title">무료 재무설계 및 포트폴리오 상담</div>
+                        <div class="ad-desc">선착순 100명</div>
+                    </div>
+                    <a href="ads.html" class="btn-get-lotto">로또받기</a>
+                </div>
+
+            </div>
+
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="home.html" class="nav-item">
+                <div class="nav-icon">🏠</div>
+                <span class="nav-text">홈</span>
+            </a>
+            <!-- Active State applies here -->
+            <a href="list.html" class="nav-item active">
+                <div class="nav-icon">📺</div>
+                <span class="nav-text">나눔로또</span>
+            </a>
+            <a href="mypage.html" class="nav-item">
+                <div class="nav-icon">👤</div>
+                <span class="nav-text">마이페이지</span>
+            </a>
+        </nav>
+
+    </div>
+
+</body>
+</html>

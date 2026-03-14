@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>광고 시청 및 무료 로또</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-card: #1e1e1e;
+            --gold-gradient: linear-gradient(135deg, #FFD700 0%, #FF8C00 100%);
+            --gold-light: #FFD700;
+            --text-main: #ffffff;
+            --text-sub: #a0a0a0;
+            --ball-size: 38px; /* Responsive size */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background-color: var(--bg-dark);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            z-index: 100;
+        }
+
+        .btn-close {
+            color: #fff;
+            font-size: 24px;
+            text-decoration: none;
+            cursor: pointer;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Video Area Placeholder */
+        .video-container {
+            flex: 1; /* Takes available space except bottom bar */
+            position: relative;
+            background: #2a2a2a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden; /* For cropping */
+        }
+        
+        /* Shorts Style 9:16 Video */
+        .video-shorts {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* This makes it fill the container, cropping edges if needed to maintain aspect ratio */
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            opacity: 0.8; /* Slight darkened effect to see UI on top if needed, can adjust */
+        }
+
+        .video-placeholder-text {
+            color: var(--text-sub);
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            padding: 20px;
+            border: 2px dashed rgba(255,255,255,0.2);
+            border-radius: 12px;
+            z-index: 20;
+            position: relative;
+        }
+
+        /* Bottom Row Area (CRITICAL CONSTRAINT: One Line) */
+        .bottom-action-bar {
+            height: 80px;
+            background: var(--bg-card);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+
+        /* Ball Container: Shrinks and distributes space evenly to fit 6 balls + 1 button */
+        .balls-row {
+            display: flex;
+            gap: 6px; /* small gap for max 360px support */
+            flex: 1;
+            justify-content: space-around;
+            align-items: center;
+            margin-right: 10px;
+        }
+
+        .ball-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: var(--ball-size);
+        }
+
+        /* The actual circle */
+        .interaction-ball {
+            width: var(--ball-size);
+            height: var(--ball-size);
+            border-radius: 50%;
+            background: #333; /* default empty */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 800;
+            color: #fff;
+            box-shadow: inset -2px -2px 6px rgba(0,0,0,0.5);
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        /* States of the ball */
+        .interaction-ball.active {
+            border-color: var(--gold-light);
+            background: rgba(255, 215, 0, 0.1);
+            animation: pulse-border 1s infinite alternate;
+        }
+
+        .interaction-ball.done {
+            background: var(--gold-gradient);
+            color: #000;
+            border-color: #FFF8DC;
+            box-shadow: inset -2px -2px 5px rgba(0,0,0,0.3), 0 4px 8px rgba(255, 215, 0, 0.4);
+            cursor: default;
+            animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .interaction-ball.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Action Save Button inside Bottom Bar */
+        .btn-save {
+            min-width: 60px;
+            height: 40px;
+            background: #444;
+            color: #aaa;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: not-allowed;
+            transition: all 0.3s;
+        }
+
+        .btn-save.ready {
+            background: var(--gold-gradient);
+            color: #000;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+        }
+
+        /* Modals Overlay */
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Modal Box */
+        .modal-box {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 320px;
+            padding: 24px;
+            text-align: center;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: var(--gold-light);
+        }
+
+        .modal-desc {
+            font-size: 14px;
+            color: var(--text-sub);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-modal {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-modal.primary {
+            background: var(--gold-gradient);
+            color: #000;
+        }
+
+        .btn-modal.secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        /* Inputs for Booking */
+        .booking-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #111;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        /* Animations */
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
+            100% { box-shadow: 0 0 0 6px rgba(255, 215, 0, 0); }
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        /* Responsive max-width 360px (Small Mobile like older iPhones) */
+        @media screen and (max-width: 360px) {
+            :root {
+                --ball-size: 32px; /* Smaller balls to fit 6 + 1 button in ~320px width */
+            }
+            .balls-row {
+                gap: 4px;
+            }
+            .interaction-ball {
+                font-size: 12px;
+            }
+            .btn-save {
+                min-width: 50px;
+                font-size: 12px;
+                height: 36px;
+                padding: 0 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <a href="home.html" class="btn-close">✕</a>
+        </div>
+
+        <!-- Placeholder for Video -->
+        <div class="video-container">
+            <!-- Sample vertical video, in real life replace src with 사모님 영상 URL -->
+            <video id="ad-video" class="video-shorts" loop playsinline>
+                <source src="박미영01.mp4" type="video/mp4">
+            </video>
+        </div>
+
+        <!-- EXACTLY ONE LINE AT BOTTOM: Balls + Save Button -->
+        <div class="bottom-action-bar">
+            <div class="balls-row" id="balls-row">
+                <!-- Javascript will inject 6 balls here automatically to keep HTML clean -->
+            </div>
+            <button class="btn-save" id="btn-save" onclick="openSaveModal()">저장</button>
+        </div>
+        
+    </div>
+
+    <!-- Modals -->
+    <!-- 1. Save completion Modal (now just an overlay for the completion card) -->
+    <div class="modal-overlay" id="save-modal">
+        <!-- Completion Card Modal -->
+        <div class="completion-card" id="completionCard">
+            <h2 style="font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 20px;">무료 로또번호 발급 및 저장 완료!</h2>
+            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 30px; line-height: 1.5;">축하합니다!<br>이번 주 행운의 주인공이 되시길 기원합니다.</p>
+            <button class="btn btn-primary" onclick="window.location.href='mypage.html'">마이페이지로</button>
+        </div>
+    </div>
+
+    <!-- 2. Booking Modal -->
+    <div class="modal-overlay" id="booking-modal">
+        <div class="modal-box">
+            <div class="modal-title">📅 방문 예약</div>
+            <div class="modal-desc">예약하실 날짜와 시간을 선택해주세요.</div>
+            
+            <input type="date" class="booking-input" id="book-date">
+            <input type="time" class="booking-input" id="book-time">
+
+            <div class="modal-actions">
+                <button class="btn-modal primary" onclick="submitBooking()">예약 확정</button>
+                <button class="btn-modal secondary" onclick="openSaveModal()">뒤로 가기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        const TOTAL_BALLS = 6;
+        const WAIT_TIME = 10; // seconds
+        
+        let currentStep = 0; // 0 to 5
+        let timerInterval = null;
+        let isWaiting = false;
+
+        const ballsRow = document.getElementById('balls-row');
+        const btnSave = document.getElementById('btn-save');
+
+        // Sound Player
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTingSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gn = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime); 
+            osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1); 
+            gn.gain.setValueAtTime(0, audioCtx.currentTime);
+            gn.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.05); 
+            gn.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5); 
+            osc.connect(gn);
+            gn.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.5);
+        }
+
+        // Initialize UI Balls
+        function initBalls() {
+            for(let i=0; i<TOTAL_BALLS; i++) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'ball-wrapper';
+
+                const ball = document.createElement('div');
+                ball.className = 'interaction-ball disabled';
+                ball.id = `ball-${i}`;
+                ball.innerText = '?'; // Show ? initially
+
+                // First ball starts as ready
+                if(i === 0) {
+                    ball.classList.remove('disabled');
+                    ball.classList.add('active');
+                    ball.innerText = '시작';
+                }
+
+                // Attach click event handler passing the index
+                ball.addEventListener('click', () => handleBallClick(i));
+
+                wrapper.appendChild(ball);
+                ballsRow.appendChild(wrapper);
+            }
+        }
+
+        const adVideo = document.getElementById('ad-video');
+        let generatedNumbers = []; // Array to store the 6 generated numbers
+
+        function handleBallClick(index) {
+            // Can only click the current active step and not while waiting
+            if (index !== currentStep || isWaiting) return;
+
+            const ball = document.getElementById(`ball-${index}`);
+            
+            // If it's the very first play
+            if (index === 0 && ball.innerText === '시작') {
+                adVideo.muted = false;
+                adVideo.play().catch(e => console.log('Autoplay prevented:', e));
+            }
+
+            // If ball says "시작" or "다음", start countdown for this ball
+            if (ball.innerText === '시작' || ball.innerText === '다음') {
+                startCountdown(index, ball);
+            } 
+            // If countdown is finished and it shows a number (already handled by done state)
+        }
+
+        function startCountdown(index, ball) {
+            isWaiting = true;
+            ball.classList.remove('active');
+            
+            let timeLeft = WAIT_TIME;
+            ball.innerText = '?';
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    finishCountdown(index, ball);
+                }
+            }, 1000);
+        }
+
+        function finishCountdown(index, ball) {
+            isWaiting = false;
+            
+            // Generate a random lotto number (for demo purposes)
+            const randomNum = Math.floor(Math.random() * 45) + 1;
+            generatedNumbers.push(randomNum); // Store the generated number
+            
+            // Set done state
+            ball.classList.add('done');
+            ball.innerText = randomNum;
+            playTingSound();
+
+            currentStep++;
+
+            // Prepare next ball if exists
+            if (currentStep < TOTAL_BALLS) {
+                const nextBall = document.getElementById(`ball-${currentStep}`);
+                nextBall.classList.remove('disabled');
+                nextBall.classList.add('active');
+                nextBall.innerText = '다음';
+            } else {
+                // All balls done! Enable Save Button
+                btnSave.classList.add('ready');
+            }
+        }
+
+        // --- Modals Logic ---
+        const saveModal = document.getElementById('save-modal'); // This is now the overlay for the completion card
+        const bookingModal = document.getElementById('booking-modal');
+        const completionCard = document.getElementById('completionCard');
+
+        function closeAllModals() {
+            saveModal.classList.remove('active');
+            bookingModal.classList.remove('active');
+            completionCard.classList.remove('active');
+        }
+
+        function openSaveModal() {
+            if (!btnSave.classList.contains('ready')) return; // ignore if not ready
+            closeAllModals();
+            saveNumbers(); // Call the new save function
+        }
+
+        function saveNumbers() {
+            // Validate all 6 numbers are generated
+            if (generatedNumbers.length < 6) return;
+
+            // Save to localStorage so MyPage can read it
+            const historyStr = localStorage.getItem('myLottoHistory') || '[]';
+            let history = [];
+            try {
+                history = JSON.parse(historyStr);
+            } catch(e) {}
+
+            // Create new record
+            const now = new Date();
+            const dateStr = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')} ` +
+                            `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+            // Optional: calculate a round number based on logic or default as '대기' later
+            history.unshift({
+                date: dateStr,
+                numbers: [...generatedNumbers],
+                timestamp: now.getTime()
+            });
+
+            localStorage.setItem('myLottoHistory', JSON.stringify(history));
+
+            // Show completion popup
+            document.getElementById('save-modal').classList.add('active'); // Activate the overlay
+            document.getElementById('completionCard').classList.add('active'); // Activate the card itself
+        }    
+
+        function openBookingModal() {
+            closeAllModals();
+            // Set today as default
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('book-date').value = today;
+            document.getElementById('book-time').value = "14:00";
+            
+            bookingModal.classList.add('active');
+        }
+
+        function submitBooking() {
+            const date = document.getElementById('book-date').value;
+            const time = document.getElementById('book-time').value;
+            if(!date || !time) {
+                alert("날짜와 시간을 선택해주세요.");
+                return;
+            }
+            alert(`예약이 완료되었습니다!\n일시: ${date} ${time}`);
+            closeAllModals();
+            location.href = 'mypage.html';
+        }
+
+        // Start
+        initBalls();
+
+        // Audio policy unlock
+        document.body.addEventListener('click', () => {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }, { once: true });
+        
+    </script>
+</body>
+</html>
