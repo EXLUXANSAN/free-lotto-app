@@ -166,15 +166,15 @@
 
         /* The actual circle */
         .interaction-ball {
-            width: 44px; /* Increased size */
-            height: 44px; /* Increased size */
+            width: 52px; /* Super increased size */
+            height: 52px; /* Super increased size */
             border-radius: 50%;
             background: #333; /* default empty */
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 16px; /* Increased font */
-            font-weight: 800;
+            font-size: 20px; /* Super increased font */
+            font-weight: 900;
             color: #fff;
             box-shadow: inset -2px -2px 6px rgba(0,0,0,0.5);
             cursor: pointer;
@@ -359,19 +359,21 @@
         /* Responsive max-width 360px (Small Mobile like older iPhones) */
         @media screen and (max-width: 360px) {
             :root {
-                --ball-size: 32px; /* Smaller balls to fit 6 + 1 button in ~320px width */
+                --ball-size: 38px; /* Slightly smaller but still big */
             }
             .balls-row {
-                gap: 4px;
+                gap: 2px;
             }
             .interaction-ball {
-                font-size: 12px;
+                font-size: 16px;
+                width: 38px;
+                height: 38px;
             }
             .btn-save {
                 min-width: 50px;
                 font-size: 12px;
-                height: 36px;
-                padding: 0 8px;
+                height: 38px;
+                padding: 0 4px;
             }
         }
     </style>

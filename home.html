@@ -271,22 +271,32 @@
         }
 
         .winners-status {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 16px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 20px;
             padding-top: 16px;
             border-top: 1px dashed var(--border-color);
             color: #fff;
-            font-size: 15px;
-            font-weight: 800;
+            font-size: 18px; /* Greatly enlarged text size */
+            font-weight: 900;
+            text-align: center;
         }
 
         .winners-status span {
             white-space: nowrap;
             background: rgba(255,255,255,0.1);
-            padding: 6px 10px;
-            border-radius: 8px;
+            padding: 10px 8px; /* Taller padding */
+            border-radius: 10px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        /* 4th and 5th take up bottom row */
+        .winners-status span:nth-child(4) {
+            grid-column: 1 / span 1;
+        }
+        .winners-status span:nth-child(5) {
+            grid-column: 2 / span 2;
         }
 
         /* CTA BUTTON */
@@ -593,13 +603,15 @@
                 if(expectedObj) expectedObj.innerText = `제${result.drwNo + 1}회 1등 누적 당첨금(예상)`;
                 
                 // Make API request for CORS via a proxy or update winner count dynamically if API allows, else random for demo
-                // Since official API doesn't provide winner count, we mock the highlighted text:
+                // Since official API doesn't provide winner count, we mock the highlighted text 1st-5th:
                 const winBox = document.getElementById('winners-status-box');
                 if(winBox) {
                     winBox.innerHTML = `
                         <span style="color:var(--gold-light);">1등: ${Math.floor(Math.random()*5 + 8)}명</span>
                         <span style="color:#69c8f2;">2등: ${Math.floor(Math.random()*20 + 40)}명</span>
                         <span style="color:#ff7272;">3등: ${Math.floor(Math.random()*100 + 2900)}명</span>
+                        <span style="color:#a0a0a0;">4등: ${Math.floor(Math.random()*5000 + 130000)}명</span>
+                        <span style="color:#7caf1a;">5등: ${Math.floor(Math.random()*15000 + 2000000)}명</span>
                     `;
                 }
             }
