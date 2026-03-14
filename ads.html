@@ -166,14 +166,14 @@
 
         /* The actual circle */
         .interaction-ball {
-            width: var(--ball-size);
-            height: var(--ball-size);
+            width: 44px; /* Increased size */
+            height: 44px; /* Increased size */
             border-radius: 50%;
             background: #333; /* default empty */
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 14px;
+            font-size: 16px; /* Increased font */
             font-weight: 800;
             color: #fff;
             box-shadow: inset -2px -2px 6px rgba(0,0,0,0.5);
@@ -182,6 +182,7 @@
             transition: all 0.2s;
             border: 2px solid transparent;
             position: relative;
+            flex-shrink: 0;
         }
 
         /* States of the ball */
@@ -192,13 +193,21 @@
         }
 
         .interaction-ball.done {
-            background: var(--gold-gradient);
-            color: #000;
+            /* Now color comes from individual classes, but provide base style */
+            color: #fff;
             border-color: #FFF8DC;
-            box-shadow: inset -2px -2px 5px rgba(0,0,0,0.3), 0 4px 8px rgba(255, 215, 0, 0.4);
+            box-shadow: inset -2px -2px 5px rgba(0,0,0,0.3), 0 4px 8px rgba(0,0,0,0.4);
             cursor: default;
             animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
+        
+        /* Ball default colors */
+        .ball-yellow { background: linear-gradient(135deg, #fbc400, #e6a000); color: #000 !important; text-shadow: none !important;}
+        .ball-blue { background: linear-gradient(135deg, #69c8f2, #1b8adb); }
+        .ball-red { background: linear-gradient(135deg, #ff7272, #d93d3d); }
+        .ball-gray { background: linear-gradient(135deg, #aaaaaa, #777777); }
+        .ball-green { background: linear-gradient(135deg, #b0d840, #7caf1a); }
 
         .interaction-ball.disabled {
             opacity: 0.5;
@@ -410,8 +419,10 @@
     <div class="modal-overlay" id="booking-modal">
         <div class="modal-box">
             <div class="modal-title">📅 방문 예약</div>
-            <div class="modal-desc">예약하실 날짜와 시간을 선택해주세요.</div>
+            <div class="modal-desc">예약하실 정보를 입력해주세요.</div>
             
+            <input type="text" class="booking-input" id="book-name" placeholder="성명">
+            <input type="tel" class="booking-input" id="book-tel" placeholder="연락처 (예: 010-1234-5678)">
             <input type="date" class="booking-input" id="book-date">
             <input type="time" class="booking-input" id="book-time">
 
@@ -518,6 +529,14 @@
             }, 1000);
         }
 
+        function getBallColorClass(num) {
+            if (num <= 10) return 'ball-yellow';
+            if (num <= 20) return 'ball-blue';
+            if (num <= 30) return 'ball-red';
+            if (num <= 40) return 'ball-gray';
+            return 'ball-green';
+        }
+
         function finishCountdown(index, ball) {
             isWaiting = false;
             
@@ -531,6 +550,7 @@
             
             // Set done state
             ball.classList.add('done');
+            ball.classList.add(getBallColorClass(randomNum));
             ball.innerText = randomNum;
             playTingSound();
 
@@ -610,13 +630,15 @@
         }
 
         function submitBooking() {
+            const name = document.getElementById('book-name').value;
+            const tel = document.getElementById('book-tel').value;
             const date = document.getElementById('book-date').value;
             const time = document.getElementById('book-time').value;
-            if(!date || !time) {
-                alert("날짜와 시간을 선택해주세요.");
+            if(!name || !tel || !date || !time) {
+                alert("성명, 연락처, 예약날짜, 예약시간을 모두 입력해주세요.");
                 return;
             }
-            alert(`예약이 완료되었습니다!\n일시: ${date} ${time}`);
+            alert(`예약이 완료되었습니다!\n성명: ${name}\n연락처: ${tel}\n일시: ${date} ${time}`);
             closeAllModals();
             location.href = 'mypage.html';
         }

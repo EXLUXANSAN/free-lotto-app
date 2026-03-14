@@ -354,16 +354,10 @@
         <!-- 스크롤 가능 메인 리스트 영역 -->
         <main class="main-content">
             
-            <!-- 상단: 지난주 당첨 결과 & 출금 포인트 -->
-            <section class="stats-section">
-                <!-- 제-회 추첨 결과 반영 -->
-                <div class="stats-title">제<span id="my-latest-round" class="stats-highlight">-</span>회 추첨 결과</div>
-                <div class="ball-row" id="my-latest-balls">
-                    <!-- JS에서 볼이 동적으로 삽입됨 -->
-                </div>
-
+            <!-- 상단: 출금 포인트 -->
+            <section class="stats-section" style="padding: 10px 20px;">
                 <!-- 출금 가능 포인트 -->
-                <div class="points-wrapper">
+                <div class="points-wrapper" style="margin-top: 0; padding-top: 0;">
                     <div class="points-label">출금 가능 포인트</div>
                     <div class="points-value">140,000<span class="points-unit">원</span></div>
                 </div>
@@ -453,31 +447,7 @@
             const roundCache = {};
             roundCache[latestData.drwNo] = latestData;
 
-            // 상단 당첨번호 UI 업데이트 (제-회 추첨 결과 포맷)
-            const roundText = document.getElementById('my-latest-round');
-            if(roundText) roundText.innerText = latestData.drwNo;
-            
-            const myLatestBalls = document.getElementById('my-latest-balls');
-            if(myLatestBalls) {
-                myLatestBalls.innerHTML = '';
-                const nums = [latestData.drwtNo1, latestData.drwtNo2, latestData.drwtNo3, latestData.drwtNo4, latestData.drwtNo5, latestData.drwtNo6];
-                nums.forEach(n => {
-                    const div = document.createElement('div');
-                    div.className = `num-badge stats-ball ${getBallColorClass(n)}`; // 상단용 대형 클래스 추가
-                    div.innerText = n;
-                    myLatestBalls.appendChild(div);
-                });
-
-                const plus = document.createElement('div');
-                plus.className = 'lotto-plus';
-                plus.innerText = '+';
-                myLatestBalls.appendChild(plus);
-
-                const bonus = document.createElement('div');
-                bonus.className = `num-badge stats-ball ${getBallColorClass(latestData.bnusNo)} bonus-ball`; // 대형 클래스 추가
-                bonus.innerText = latestData.bnusNo;
-                myLatestBalls.appendChild(bonus);
-            }
+            // API 패치 없이 로컬스토리지 내역만 호출하도록 축소 (번호 표시 제거됨)
 
             // 로컬스토리지 호출
             const historyStr = localStorage.getItem('myLottoHistory') || '[]';
