@@ -50,6 +50,7 @@
             overflow-x: hidden;
             -ms-overflow-style: none;
             scrollbar-width: none;
+            padding-bottom: 80px;
         }
         
         .app-container::-webkit-scrollbar {
@@ -167,9 +168,12 @@
 
         /* BOTTOM NAVIGATION */
         .bottom-nav {
-            position: absolute;
+            position: fixed;
             bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
             width: 100%;
+            max-width: 480px;
             height: 70px;
             background: var(--nav-bg);
             backdrop-filter: blur(10px);
@@ -177,7 +181,7 @@
             display: flex;
             justify-content: space-around;
             align-items: center;
-            z-index: 20;
+            z-index: 1000;
             padding-bottom: env(safe-area-inset-bottom);
         }
 

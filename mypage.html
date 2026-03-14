@@ -58,7 +58,7 @@
         /* 3. 스크롤 가능한 메인 화면 */
         .main-content {
             flex: 1;
-            padding-bottom: 20px;
+            padding-bottom: 100px; /* 하단 바에 내용이 가리지 않게 수정 */
             overflow-y: auto;
             -ms-overflow-style: none; /* IE, Edge */
             scrollbar-width: none; /* Firefox */
@@ -301,7 +301,12 @@
 
         /* 8. 하단 네비게이션 탭 바 */
         .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
             width: 100%;
+            max-width: 430px;
             height: 70px;
             background: #181818;
             border-top: 1px solid var(--border-color);
@@ -309,6 +314,7 @@
             justify-content: space-around;
             align-items: center;
             padding-bottom: env(safe-area-inset-bottom);
+            z-index: 1000;
         }
 
         .nav-item {

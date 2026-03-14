@@ -43,6 +43,7 @@
             background-color: var(--bg-dark);
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
             overflow: hidden;
+            padding-bottom: 80px;
         }
 
         /* Top Bar */
@@ -82,12 +83,12 @@
         .video-shorts {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* This makes it fill the container, cropping edges if needed to maintain aspect ratio */
+            object-fit: cover;
             position: absolute;
             top: 0;
             left: 0;
             z-index: 10;
-            opacity: 0.8; /* Slight darkened effect to see UI on top if needed, can adjust */
+            opacity: 1; /* 영상이 선명하게 보이도록 수정 */
         }
 
         .video-placeholder-text {
@@ -102,8 +103,39 @@
             position: relative;
         }
 
+        /* 무료 로또 번호 받기 버튼 (영상 종료 후 등장) */
+        .btn-get-lotto {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gold-gradient);
+            color: #000;
+            font-size: 20px;
+            font-weight: 800;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
+            z-index: 50;
+            cursor: pointer;
+            display: none; /* 처음에 숨김 */
+            white-space: nowrap;
+            animation: bounce 1s infinite alternate;
+        }
+        @keyframes bounce {
+            0% { transform: translate(-50%, 0); }
+            100% { transform: translate(-50%, -10px); }
+        }
+
         /* Bottom Row Area (CRITICAL CONSTRAINT: One Line) */
         .bottom-action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
             height: 80px;
             background: var(--bg-card);
             display: flex;
@@ -111,7 +143,7 @@
             justify-content: space-between;
             padding: 0 10px;
             box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
-            z-index: 100;
+            z-index: 1000;
         }
 
         /* Ball Container: Shrinks and distributes space evenly to fit 6 balls + 1 button */
@@ -327,14 +359,14 @@
 
         <!-- Placeholder for Video -->
         <div class="video-container">
-            <!-- Sample vertical video, in real life replace src with 사모님 영상 URL -->
-            <video id="ad-video" class="video-shorts" loop playsinline>
-                <source src="박미영01.mp4" type="video/mp4">
-            </video>
+            <!-- 사용자가 업로드한 wife_ad.mp4 배치 및 자동재생(음소거) 설정 -->
+            <video id="ad-video" class="video-shorts" src="wife_ad.mp4" autoplay muted playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
+            <!-- 영상 종료 후 나타날 버튼 -->
+            <button id="btn-get-lotto" class="btn-get-lotto">🎁 무료 로또 번호 받기</button>
         </div>
 
         <!-- EXACTLY ONE LINE AT BOTTOM: Balls + Save Button -->
-        <div class="bottom-action-bar">
+        <div class="bottom-action-bar" id="bottom-action-bar" style="display: none;">
             <div class="balls-row" id="balls-row">
                 <!-- Javascript will inject 6 balls here automatically to keep HTML clean -->
             </div>
@@ -427,19 +459,30 @@
         }
 
         const adVideo = document.getElementById('ad-video');
+        const btnGetLotto = document.getElementById('btn-get-lotto');
+        const bottomActionBar = document.getElementById('bottom-action-bar');
         let generatedNumbers = []; // Array to store the 6 generated numbers
+
+        // 영상이 끝나면 버튼 표시
+        adVideo.addEventListener('ended', () => {
+            btnGetLotto.style.display = 'block';
+        });
+
+        // 무료 번호 받기 버튼 클릭 시
+        btnGetLotto.addEventListener('click', () => {
+            btnGetLotto.style.display = 'none';
+            bottomActionBar.style.display = 'flex'; // 하단 공 뽑기 영역 노출
+            
+            // 첫 번째 공(시작)을 자동으로 클릭하여 뽑기 시작
+            const firstBall = document.getElementById('ball-0');
+            if(firstBall) firstBall.click();
+        });
 
         function handleBallClick(index) {
             // Can only click the current active step and not while waiting
             if (index !== currentStep || isWaiting) return;
 
             const ball = document.getElementById(`ball-${index}`);
-            
-            // If it's the very first play
-            if (index === 0 && ball.innerText === '시작') {
-                adVideo.muted = false;
-                adVideo.play().catch(e => console.log('Autoplay prevented:', e));
-            }
 
             // If ball says "시작" or "다음", start countdown for this ball
             if (ball.innerText === '시작' || ball.innerText === '다음') {

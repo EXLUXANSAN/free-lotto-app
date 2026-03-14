@@ -51,6 +51,7 @@
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
             overflow-y: auto;
             overflow-x: hidden;
+            padding-bottom: 80px;
         }
         
         /* Hide scrollbar for standard app feel */
@@ -315,9 +316,12 @@
 
         /* BOTTOM NAVIGATION */
         .bottom-nav {
-            position: absolute;
+            position: fixed;
             bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
             width: 100%;
+            max-width: 480px;
             height: 70px;
             background: var(--nav-bg);
             backdrop-filter: blur(10px);
@@ -325,7 +329,7 @@
             display: flex;
             justify-content: space-around;
             align-items: center;
-            z-index: 20;
+            z-index: 1000;
             padding-bottom: env(safe-area-inset-bottom); /* For iOS handle */
         }
 
