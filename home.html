@@ -272,33 +272,51 @@
 
         .winners-status {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
             margin-top: 20px;
             padding-top: 16px;
             border-top: 1px dashed var(--border-color);
             color: #fff;
-            font-size: 24px; /* Greatly enlarged text size (1.5x) */
-            font-weight: 900;
-            text-align: center;
+            width: 100%;
         }
 
-        .winners-status span {
-            white-space: nowrap;
+        .winner-item {
             background: rgba(255,255,255,0.1);
-            padding: 16px 8px; /* Taller padding */
+            padding: 12px 4px;
             border-radius: 10px;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-            font-size: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .winner-item span.rank {
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 4px;
+            opacity: 0.9;
+        }
+
+        .winner-item span.count {
+            font-size: 16px;
             font-weight: 900;
+            letter-spacing: -0.5px;
         }
-        
-        /* 4th and 5th take up bottom row */
-        .winners-status span:nth-child(4) {
-            grid-column: 1 / span 1;
+
+        /* 1, 2, 3 takes 2/6 cols -> 3 cols per row */
+        .winner-item:nth-child(1),
+        .winner-item:nth-child(2),
+        .winner-item:nth-child(3) {
+            grid-column: span 2;
         }
-        .winners-status span:nth-child(5) {
-            grid-column: 2 / span 2;
+
+        /* 4, 5 takes 3/6 cols -> 2 cols per row */
+        .winner-item:nth-child(4),
+        .winner-item:nth-child(5) {
+            grid-column: span 3;
         }
 
         /* CTA BUTTON */
@@ -393,7 +411,8 @@
             .btn-cta { padding: 15px; font-size: 16px; }
             .bottom-nav { height: 60px; }
             .nav-icon { font-size: 20px; }
-            .winners-status { font-size: 10px; }
+            .winner-item span.count { font-size: 14px; }
+            .winner-item span.rank { font-size: 11px; }
         }
     </style>
 </head>
@@ -458,9 +477,11 @@
                     <div class="lotto-ball ball-blue" style="box-shadow: 0 0 10px rgba(255,215,0,0.5); border: 2px solid #FFD700;">11</div> <!-- Bonus Ball -->
                 </div>
                 <div class="winners-status" id="winners-status-box">
-                    <span>1등: 10명</span>
-                    <span>2등: 50명</span>
-                    <span>3등: 100명</span>
+                    <div class="winner-item"><span class="rank" style="color:var(--gold-light);">1등</span><span class="count" style="color:var(--gold-light);">10명</span></div>
+                    <div class="winner-item"><span class="rank" style="color:#69c8f2;">2등</span><span class="count" style="color:#69c8f2;">50명</span></div>
+                    <div class="winner-item"><span class="rank" style="color:#ff7272;">3등</span><span class="count" style="color:#ff7272;">100명</span></div>
+                    <div class="winner-item"><span class="rank" style="color:#d0d0d0;">4등</span><span class="count" style="color:#d0d0d0;">100,000명</span></div>
+                    <div class="winner-item"><span class="rank" style="color:#b0d840;">5등</span><span class="count" style="color:#b0d840;">2,000,000명</span></div>
                 </div>
             </section>
 
@@ -620,11 +641,11 @@
                 const winBox = document.getElementById('winners-status-box');
                 if(winBox) {
                     winBox.innerHTML = `
-                        <span style="color:var(--gold-light);">1등: ${Math.floor(Math.random()*5 + 8)}명</span>
-                        <span style="color:#69c8f2;">2등: ${Math.floor(Math.random()*20 + 40)}명</span>
-                        <span style="color:#ff7272;">3등: ${Math.floor(Math.random()*100 + 2900)}명</span>
-                        <span style="color:#d0d0d0;">4등: ${(Math.floor(Math.random()*5000 + 130000)).toLocaleString()}명</span>
-                        <span style="color:#b0d840;">5등: ${(Math.floor(Math.random()*15000 + 2000000)).toLocaleString()}명</span>
+                        <div class="winner-item"><span class="rank" style="color:var(--gold-light);">1등</span><span class="count" style="color:var(--gold-light);">${Math.floor(Math.random()*5 + 8)}명</span></div>
+                        <div class="winner-item"><span class="rank" style="color:#69c8f2;">2등</span><span class="count" style="color:#69c8f2;">${Math.floor(Math.random()*20 + 40)}명</span></div>
+                        <div class="winner-item"><span class="rank" style="color:#ff7272;">3등</span><span class="count" style="color:#ff7272;">${Math.floor(Math.random()*100 + 2900)}명</span></div>
+                        <div class="winner-item"><span class="rank" style="color:#d0d0d0;">4등</span><span class="count" style="color:#d0d0d0;">${(Math.floor(Math.random()*5000 + 130000)).toLocaleString()}명</span></div>
+                        <div class="winner-item"><span class="rank" style="color:#b0d840;">5등</span><span class="count" style="color:#b0d840;">${(Math.floor(Math.random()*15000 + 2000000)).toLocaleString()}명</span></div>
                     `;
                 }
             }
