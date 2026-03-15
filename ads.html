@@ -147,21 +147,21 @@
             z-index: 1000;
         }
 
-        /* Ball Container: Shrinks and distributes space evenly to fit 6 balls + 1 button */
+        /* Ball Container: Shrinks and distributes space evenly to fit 6 balls */
         .balls-row {
             display: flex;
-            gap: 6px; /* small gap for max 360px support */
+            gap: 12px; /* Bigger gap now that button is hidden */
             flex: 1;
-            justify-content: space-around;
+            justify-content: space-between;
             align-items: center;
-            margin-right: 10px;
+            width: 100%;
         }
 
         .ball-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: var(--ball-size);
+            flex: 1; /* Distribute evenly across width */
         }
 
         /* The actual circle */
@@ -216,23 +216,30 @@
 
         /* Action Save Button inside Bottom Bar */
         .btn-save {
-            min-width: 60px;
-            height: 40px;
+            min-width: 80px;
+            height: 48px;
             background: #444;
             color: #aaa;
             border: none;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 800;
-            cursor: not-allowed;
-            transition: all 0.3s;
+            display: none; /* Initially hidden */
+            margin-left: 10px;
         }
 
         .btn-save.ready {
+            display: block; /* Show when ready */
             background: var(--gold-gradient);
             color: #000;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+            animation: slideInRight 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
         /* Modals Overlay */
@@ -362,17 +369,17 @@
                 --ball-size: 38px; /* Slightly smaller but still big */
             }
             .balls-row {
-                gap: 2px;
+                gap: 4px; /* Increase gap slightly for mobile now */
             }
             .interaction-ball {
                 font-size: 16px;
-                width: 38px;
-                height: 38px;
+                width: 44px; /* Larger than before */
+                height: 44px; /* Larger than before */
             }
             .btn-save {
-                min-width: 50px;
-                font-size: 12px;
-                height: 38px;
+                min-width: 60px;
+                font-size: 14px;
+                height: 44px;
                 padding: 0 4px;
             }
         }
@@ -408,8 +415,10 @@
     <div class="modal-overlay" id="save-modal">
         <!-- Completion Card Modal -->
         <div class="completion-card" id="completionCard">
-            <h2 style="font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 20px;">무료 로또번호 발급 및 저장 완료!</h2>
-            <p id="save-modal-message" style="color: var(--text-sub); font-size: 14px; margin-bottom: 30px; line-height: 1.5;">축하합니다!<br>이번 주 행운의 주인공이 되시길 기원합니다.</p>
+            <h2 style="font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 20px;">저장 완료되었습니다.</h2>
+            <div id="save-modal-message" style="margin-bottom: 30px; display: flex; justify-content: center; gap: 8px;">
+                <!-- Balls will be dynamically injected here -->
+            </div>
             <div class="modal-actions">
                 <button class="btn-modal primary" onclick="openBookingModal()">📅 방문예약 하기</button>
                 <button class="btn-modal secondary" onclick="window.location.href='mypage.html'">마이페이지로</button>
@@ -613,8 +622,19 @@
             localStorage.setItem('myLottoHistory', JSON.stringify(history));
 
             // Dynamic message format specifically requested by user
-            const numString = generatedNumbers.join(', ');
-            document.getElementById('save-modal-message').innerText = `나눔 로또 번호 [${numString}]번이 마이페이지에 저장되었습니다.`;
+            const messageContainer = document.getElementById('save-modal-message');
+            messageContainer.innerHTML = ''; // Keep it clean
+            
+            generatedNumbers.forEach(n => {
+                const ball = document.createElement('div');
+                ball.className = `interaction-ball ${getBallColorClass(n)} done`;
+                ball.style.width = '36px'; // Slightly smaller for modal
+                ball.style.height = '36px';
+                ball.style.fontSize = '14px';
+                ball.style.boxShadow = 'none'; // Overwrite popup style
+                ball.innerText = n;
+                messageContainer.appendChild(ball);
+            });
 
             // Show completion popup
             document.getElementById('save-modal').classList.add('active'); // Activate the overlay
