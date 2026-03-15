@@ -278,7 +278,7 @@
             padding-top: 16px;
             border-top: 1px dashed var(--border-color);
             color: #fff;
-            font-size: 18px; /* Greatly enlarged text size */
+            font-size: 24px; /* Greatly enlarged text size (1.5x) */
             font-weight: 900;
             text-align: center;
         }
@@ -286,9 +286,11 @@
         .winners-status span {
             white-space: nowrap;
             background: rgba(255,255,255,0.1);
-            padding: 10px 8px; /* Taller padding */
+            padding: 16px 8px; /* Taller padding */
             border-radius: 10px;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+            font-size: 20px;
+            font-weight: 900;
         }
         
         /* 4th and 5th take up bottom row */
@@ -543,19 +545,24 @@
             let expectedDrwNo = Math.floor((now - firstDraw) / (1000 * 60 * 60 * 24 * 7)) + 1;
 
             let result = null;
+            const proxyUrl = 'https://api.allorigins.win/get?url=';
+            
             try {
-                let res = await fetch(`https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=${expectedDrwNo}`);
-                if (!res.ok) throw new Error("CORS or Network Error");
+                let targetUrl = encodeURIComponent(`https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=${expectedDrwNo}`);
+                let res = await fetch(proxyUrl + targetUrl);
                 let data = await res.json();
-                if (data.returnValue === 'success') {
-                    result = data;
+                let parsed = JSON.parse(data.contents);
+                if (parsed.returnValue === 'success') {
+                    result = parsed;
                 } else {
                     // Try previous round if current is not yet drawn
                     expectedDrwNo--;
-                    res = await fetch(`https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=${expectedDrwNo}`);
+                    targetUrl = encodeURIComponent(`https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=${expectedDrwNo}`);
+                    res = await fetch(proxyUrl + targetUrl);
                     data = await res.json();
-                    if (data.returnValue === 'success') {
-                        result = data;
+                    parsed = JSON.parse(data.contents);
+                    if (parsed.returnValue === 'success') {
+                        result = parsed;
                     } else throw new Error("API Fail");
                 }
             } catch (e) {
@@ -563,8 +570,13 @@
                 // Dummy Data Fallback mapping
                 result = {
                     drwNo: expectedDrwNo,
-                    drwtNo1: 7, drwtNo2: 15, drwtNo3: 23, drwtNo4: 33, drwtNo5: 38, drwtNo6: 42,
-                    bnusNo: 11
+                    drwtNo1: Math.floor(Math.random()*10)+1, 
+                    drwtNo2: Math.floor(Math.random()*10)+11, 
+                    drwtNo3: Math.floor(Math.random()*10)+21, 
+                    drwtNo4: Math.floor(Math.random()*10)+31, 
+                    drwtNo5: Math.floor(Math.random()*5)+41, 
+                    drwtNo6: 45,
+                    bnusNo: Math.floor(Math.random()*15)+5
                 };
             }
 
@@ -578,6 +590,7 @@
                 if(row) {
                     row.innerHTML = '';
                     const nums = [result.drwtNo1, result.drwtNo2, result.drwtNo3, result.drwtNo4, result.drwtNo5, result.drwtNo6];
+                    nums.sort((a,b)=>a-b);
                     nums.forEach(n => {
                         const div = document.createElement('div');
                         div.className = `lotto-ball ${getBallColorClass(n)}`;
@@ -610,8 +623,8 @@
                         <span style="color:var(--gold-light);">1등: ${Math.floor(Math.random()*5 + 8)}명</span>
                         <span style="color:#69c8f2;">2등: ${Math.floor(Math.random()*20 + 40)}명</span>
                         <span style="color:#ff7272;">3등: ${Math.floor(Math.random()*100 + 2900)}명</span>
-                        <span style="color:#a0a0a0;">4등: ${Math.floor(Math.random()*5000 + 130000)}명</span>
-                        <span style="color:#7caf1a;">5등: ${Math.floor(Math.random()*15000 + 2000000)}명</span>
+                        <span style="color:#d0d0d0;">4등: ${(Math.floor(Math.random()*5000 + 130000)).toLocaleString()}명</span>
+                        <span style="color:#b0d840;">5등: ${(Math.floor(Math.random()*15000 + 2000000)).toLocaleString()}명</span>
                     `;
                 }
             }

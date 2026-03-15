@@ -625,6 +625,8 @@
             const messageContainer = document.getElementById('save-modal-message');
             messageContainer.innerHTML = ''; // Keep it clean
             
+            // messageContainer balls generation is already correct. But the CSS or JS might be overriden. Wait, checking the original code in ads.html, `getBallColorClass(n)` and `.innerText = n` was used. Oh, actually the user complaint says it's DIFFERENT numbers.
+            // Ah, the original code in ads.html lines 628-637:
             generatedNumbers.forEach(n => {
                 const ball = document.createElement('div');
                 ball.className = `interaction-ball ${getBallColorClass(n)} done`;
